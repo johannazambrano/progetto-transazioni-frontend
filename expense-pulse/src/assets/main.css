@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Questo è il reset per lo sfondo della dashboard */
+@theme {
+  --color-brand: #6366f1;
+}
+
+body {
+  background-color: #f8fafc;
+  font-family: sans-serif;
+}
