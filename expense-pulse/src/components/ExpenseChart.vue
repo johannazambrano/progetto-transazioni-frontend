@@ -53,7 +53,7 @@ const chartOptions = {
 
 <template>
   <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-    <h3 class="text-lg font-bold mb-4 text-gray-800">Distribuzione Spese</h3>
+    <!-- <h3 class="text-lg font-bold mb-4 text-gray-800">Distribuzione Spese</h3> -->
     <div class="h-64 flex justify-center">
       <Pie v-if="hasData" :data="chartData" :options="chartOptions" />
       <div v-else class="flex items-center text-gray-400">

@@ -455,7 +455,7 @@ const resetFilters = async () => {
                 'p-3 rounded-2xl transition-all',
                 t.amount > 0
                   ? 'bg-emerald-50 text-emerald-600'
-                  : 'bg-gray-100 text-gray-500',
+                  : 'bg-rose-100 text-rose-500',
               ]"
             >
               <component
@@ -513,10 +513,6 @@ const resetFilters = async () => {
       </div>
     </section>
   </main>
-
-  <!-- <button @click="openCategoryModal" type="button" class="text-indigo-600 text-xs font-bold hover:underline mt-1">
-    + Gestisci Categorie
-  </button> -->
 
   <div
     v-if="isCategoryModalOpen"
