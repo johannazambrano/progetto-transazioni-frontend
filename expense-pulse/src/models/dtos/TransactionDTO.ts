@@ -6,13 +6,16 @@ export interface TransactionDTO {
     title: string;
     amount: number;
     category: CategoryDTO; // Qui Quarkus invia la descrizione o l'ID della categoria
-    date: string;
+    startDate: string;
+    endDate: string;
 }
 
 // DTO per l'invio della ricerca (POST /ricerca)
 export interface FiltroRicercaTransactionDTO {
     title?: string;
     category?: string;
+    startDate?: string; 
+    endDate?: string;
     paginazione: Partial<PaginazioneDTO>; 
 }
 

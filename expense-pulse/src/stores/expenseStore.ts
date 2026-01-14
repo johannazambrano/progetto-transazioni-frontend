@@ -50,6 +50,9 @@ export const useExpenseStore = defineStore("expense", () => {
       
       // Fondamentale: invia la categoria solo se non è "" (Tutte le categorie)
       category: filters.category && filters.category !== "" ? filters.category : undefined,
+
+      startDate: filters.startDate || undefined,
+      endDate: filters.endDate || undefined,
       
       paginazione: {
         numeroPagina: filters.paginazione?.numeroPagina || 0,
