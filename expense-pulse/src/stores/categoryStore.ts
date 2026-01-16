@@ -38,16 +38,16 @@ export const useCategoryStore = defineStore("category", () => {
     }
   };
 
-  const addCategory = async (descrizione: string) => {
+  const addCategory = async (catData: { descrizione: string, budget: number, colore: string }) => {
     try {
       // 1. Controllo univocità Descrizione (Case Insensitive)
       const isDuplicate = categories.value.some(
-        (cat) => cat.descrizione.toLowerCase() === descrizione.toLowerCase()
+        (cat) => cat.descrizione.toLowerCase() === catData.descrizione.toLowerCase()
       );
 
       if(isDuplicate){
         // si lancia un errore specifico che si potrebbe catturare nella view
-        throw new Error(`La categoria "${descrizione}" esiste già.`);
+        throw new Error(`La categoria "${catData.descrizione}" esiste già.`);
       }
 
       // 2. Recuperiamo il codice dalla computed
@@ -56,8 +56,10 @@ export const useCategoryStore = defineStore("category", () => {
       // 3. Creiamo l'entity
       const newEntity: Category = {
         id: "",
-        descrizione: descrizione,
+        descrizione: catData.descrizione,
         codice: code,
+        budget: catData.budget,
+        colore: catData.colore
       };
 
       // 4. Creiamo DTO e lo inviamo

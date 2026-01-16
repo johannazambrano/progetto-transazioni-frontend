@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { Pencil, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
@@ -9,7 +9,6 @@ import { onMounted } from "vue";
 import ExpenseChart from "@/components/ExpenseChart.vue";
 import TimeChart from "@/components/TimeChart.vue";
 import AppPagination from "@/components/AppPagination.vue";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import {
   Wallet,
   ArrowUpCircle,
@@ -51,6 +50,23 @@ onMounted(async () => {
 const isEditing = ref(false);
 const editingId = ref<string | null>(null);
 
+// Variabile per attivare l'effetto shake sugli errori
+const isShakingForm = ref(false);
+const isShakingSearch = ref(false);
+
+// Funzione per attivare l'effetto shake
+// Trigger per il form Nuova Operazione
+const triggerShakeForm = () => {
+  isShakingForm.value = true;
+  setTimeout(() => (isShakingForm.value = false), 400);
+};
+
+// Trigger per la Ricerca Avanzata
+const triggerShakeSearch = () => {
+  isShakingSearch.value = true;
+  setTimeout(() => (isShakingSearch.value = false), 400);
+};
+
 // Funzione per caricare i dati nel form
 const startEdit = (transaction: Transaction) => {
   isEditing.value = true;
@@ -82,28 +98,69 @@ const cancelEdit = () => {
 
 // Variabile per capire se il modale è attivo o no
 const isCategoryModalOpen = ref(false);
-const newCat = ref({ descrizione: "", codice: "" });
+const newCat = ref({
+  descrizione: "",
+  codice: "",
+  budget: 0,
+  colore: "#4f46e5", // Colore di default (Indigo)
+});
 
 const openCategoryModal = () => {
-  console.log("Entro qui 2");
   // Si imposta automaticamente il codice restituito dallo store
   newCat.value.codice = categoryStore.nextAvailableCode;
   console.log("category codice:", categoryStore.nextAvailableCode);
   newCat.value.descrizione = "";
+  newCat.value.budget = 0;
+  isCategoryModalOpen.value = true;
+  // Generiamo un colore casuale
+  let randomColor = generateRandomColor();
+
+  // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
+  const existingColors = categoryStore.categories.map((c) =>
+    c.colore.toUpperCase()
+  );
+  while (existingColors.includes(randomColor.toUpperCase())) {
+    randomColor = generateRandomColor();
+  }
+
+  newCat.value.colore = randomColor;
   isCategoryModalOpen.value = true;
 };
 
 const saveCategory = async () => {
   // Validazione: controlla che la descrizione non sia vuota
-  if (!newCat.value.descrizione.trim()) return;
+  if (!newCat.value.descrizione.trim() || newCat.value.budget <= 0) {
+    alert("Inserisci una descrizione e un budget valido.");
+    return;
+  }
+
+  // Controllo se il colore è già in uso
+  const colorExists = categoryStore.categories.some(
+    (c) => c.colore === newCat.value.colore
+  );
+  if (colorExists) {
+    alert(
+      "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!"
+    );
+    return;
+  }
 
   try {
     // Passiamo solo la stringa della descrizione allo store
-    await categoryStore.addCategory(newCat.value.descrizione);
+    await categoryStore.addCategory({
+      descrizione: newCat.value.descrizione,
+      budget: newCat.value.budget,
+      colore: newCat.value.colore,
+    });
 
     // Reset e chiusura
     isCategoryModalOpen.value = false;
-    newCat.value.descrizione = "";
+    newCat.value = {
+      descrizione: "",
+      codice: "",
+      budget: 0,
+      colore: "#4f46e5",
+    };
     alert("Categoria creata con successo");
   } catch (e: any) {
     console.error(e);
@@ -142,11 +199,13 @@ const handleSave = async () => {
 
   // Validazione descrizione
   if (!newTransaction.value.title.trim()) {
+    triggerShakeForm();
     return; // Il messaggio apparirà sotto l'input
   }
 
   // Validazione importo (ora gestita graficamente nel template)
   if (newTransaction.value.amount === 0) {
+    triggerShakeForm();
     return;
   }
 
@@ -154,7 +213,10 @@ const handleSave = async () => {
     (cat) => cat.descrizione === newTransaction.value.category
   );
 
-  if (!selectedCategoryObj) return;
+  if (!selectedCategoryObj) {
+    triggerShakeForm();
+    return;
+  }
 
   try {
     // 2. Prepariamo i dati nel formato Entity (con l'oggetto categoria)
@@ -239,12 +301,14 @@ const applyFilters = async () => {
 
   // 1. Controllo Intervallo Completo: Se uno dei due è presente, serve anche l'altro
   if ((startDate && !endDate) || (!startDate && endDate)) {
+    triggerShakeSearch();
     return; // Usciamo silenziosamente, il messaggio apparirà nel template
   }
 
   // 2. Controllo Coerenza Date: Fine deve essere >= Inizio
   if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
     // Qui non facciamo nulla, lasciamo che il messaggio di errore nel template avvisi l'utente
+    triggerShakeSearch();
     return;
   }
 
@@ -265,6 +329,16 @@ const applyFilters = async () => {
 const resetFilters = async () => {
   filters.value = { title: "", category: "", startDate: "", endDate: "" };
   await store.fetchTransactions();
+};
+
+// Funzione per generare un colore HEX random
+const generateRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 </script>
 
@@ -325,6 +399,7 @@ const resetFilters = async () => {
 
     <section
       class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
+      :class="{ 'animate-shake border-red-200': isShakingForm }"
     >
       <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
         <component
@@ -366,7 +441,9 @@ const resetFilters = async () => {
             type="number"
             placeholder="0.00"
             class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-            :class="{ 'border-red-400': showErrors && newTransaction.amount === 0 }"
+            :class="{
+              'border-red-400': showErrors && newTransaction.amount === 0,
+            }"
           />
           <p
             v-if="showErrors && newTransaction.amount === 0"
@@ -433,10 +510,11 @@ const resetFilters = async () => {
 
     <!-- INIZIO RICERCA AVANZATA -->
     <section
-      class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8"
+      class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 transition-all"
+      :class="{ 'animate-shake border-red-200': isShakingSearch }"
     >
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">
+        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">
           Ricerca Avanzata
         </h3>
         <button
@@ -657,6 +735,46 @@ const resetFilters = async () => {
             placeholder="Es. Palestra"
             class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
           />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
+              >Budget Mensile</label
+            >
+            <input
+              v-model.number="newCat.budget"
+              type="number"
+              placeholder="0.00"
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
+              >Colore Identificativo</label
+            >
+            <div class="flex items-center gap-3">
+              <div class="relative group">
+                <input
+                  v-model="newCat.colore"
+                  type="color"
+                  class="w-12 h-12 p-1 bg-white border border-gray-200 rounded-xl cursor-pointer"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <span class="text-xs font-mono font-bold text-gray-600">{{
+                  newCat.colore.toUpperCase()
+                }}</span>
+                <button
+                  @click="newCat.colore = generateRandomColor()"
+                  type="button"
+                  class="text-[10px] text-indigo-600 hover:underline flex items-center gap-1"
+                >
+                  Cambia colore
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

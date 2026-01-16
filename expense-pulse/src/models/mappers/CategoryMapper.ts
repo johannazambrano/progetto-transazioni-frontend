@@ -6,7 +6,9 @@ export class CategoryMapper {
         return {
             id: dto.id || '',
             descrizione: dto.descrizione,
-            codice: dto.codice
+            codice: dto.codice,
+            budget: dto.budget || 0,
+            colore: dto.colore || '#FFFFFF'
         }
     }
 
