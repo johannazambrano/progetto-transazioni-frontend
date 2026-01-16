@@ -15,7 +15,9 @@ export class CategoryMapper {
     static toDTO(entity: Category): CategoryDTO {
         const dto: CategoryDTO = {
             descrizione: entity.descrizione,
-            codice: entity.codice
+            codice: entity.codice,
+            budget: entity.budget,
+            colore: entity.colore
         };
 
         // Includiamo l'id solo se esiste e non è vuoto (utile per il PUT, non per il POST)
