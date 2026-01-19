@@ -129,8 +129,8 @@ const openCategoryModal = () => {
 
 const saveCategory = async () => {
   // Validazione: controlla che la descrizione non sia vuota
-  if (!newCat.value.descrizione.trim() || newCat.value.budget <= 0) {
-    alert("Inserisci una descrizione e un budget valido.");
+  if (!newCat.value.descrizione.trim()) { // || newCat.value.budget <= 0 per gestire eventualmente il budget
+    alert("Inserisci una descrizione valida per la categoria."); // e un budget valido.
     return;
   }
 
@@ -138,6 +138,7 @@ const saveCategory = async () => {
   const colorExists = categoryStore.categories.some(
     (c) => c.colore === newCat.value.colore
   );
+
   if (colorExists) {
     alert(
       "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!"
