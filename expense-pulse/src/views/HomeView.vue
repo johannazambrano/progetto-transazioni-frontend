@@ -20,6 +20,7 @@ import {
   Settings,
   Layers
 } from "lucide-vue-next";
+import BalanceCards from "@/components/BalanceCards.vue";
 
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
@@ -363,7 +364,8 @@ const generateRandomColor = () => {
       </RouterLink>
     </header>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <BalanceCards/>
+      <!-- <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-2">
           <span class="text-gray-500 text-sm font-semibold uppercase"
             >Saldo Totale</span
@@ -376,9 +378,8 @@ const generateRandomColor = () => {
         >
           {{ formatCurrency(store.totalBalance) }}
         </p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      </div> -->
+      <!-- <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-2">
           <span
             class="text-gray-500 text-sm font-semibold uppercase text-emerald-600"
@@ -389,9 +390,9 @@ const generateRandomColor = () => {
         <p class="text-3xl font-bold text-emerald-600">
           {{ formatCurrency(store.totalIncomes) }}
         </p>
-      </div>
+      </div> -->
 
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <!-- <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-2">
           <span
             class="text-gray-500 text-sm font-semibold uppercase text-rose-600"
@@ -402,7 +403,7 @@ const generateRandomColor = () => {
         <p class="text-3xl font-bold text-rose-600">
           {{ formatCurrency(Math.abs(store.totalExpenses)) }}
         </p>
-      </div>
+      </div> -->
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
       <ExpenseChart />
