@@ -58,15 +58,15 @@ const isEditing = ref(false);
 const editingId = ref<string | null>(null);
 
 // Variabile per attivare l'effetto shake sugli errori
-const isShakingForm = ref(false);
+// const isShakingForm = ref(false);
 const isShakingSearch = ref(false);
 
 // Funzione per attivare l'effetto shake
 // Trigger per il form Nuova Operazione
-const triggerShakeForm = () => {
-  isShakingForm.value = true;
-  setTimeout(() => (isShakingForm.value = false), 400);
-};
+// const triggerShakeForm = () => {
+//   isShakingForm.value = true;
+//   setTimeout(() => (isShakingForm.value = false), 400);
+// };
 
 // Trigger per la Ricerca Avanzata
 const triggerShakeSearch = () => {
@@ -104,79 +104,79 @@ const cancelEdit = () => {
 };
 
 // Variabile per capire se il modale è attivo o no
-const isCategoryModalOpen = ref(false);
-const newCat = ref({
-  descrizione: "",
-  codice: "",
-  budget: 0,
-  colore: "#4f46e5", // Colore di default (Indigo)
-});
+// const isCategoryModalOpen = ref(false);
+// const newCat = ref({
+//   descrizione: "",
+//   codice: "",
+//   budget: 0,
+//   colore: "#4f46e5", // Colore di default (Indigo)
+// });
 
-const openCategoryModal = () => {
-  // Si imposta automaticamente il codice restituito dallo store
-  newCat.value.codice = categoryStore.nextAvailableCode;
-  console.log("category codice:", categoryStore.nextAvailableCode);
-  newCat.value.descrizione = "";
-  newCat.value.budget = 0;
-  isCategoryModalOpen.value = true;
-  // Generiamo un colore casuale
-  let randomColor = generateRandomColor();
+// const openCategoryModal = () => {
+//   // Si imposta automaticamente il codice restituito dallo store
+//   newCat.value.codice = categoryStore.nextAvailableCode;
+//   console.log("category codice:", categoryStore.nextAvailableCode);
+//   newCat.value.descrizione = "";
+//   newCat.value.budget = 0;
+//   isCategoryModalOpen.value = true;
+//   // Generiamo un colore casuale
+//   let randomColor = generateRandomColor();
 
-  // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
-  const existingColors = categoryStore.categories.map((c) =>
-    c.colore.toUpperCase(),
-  );
-  while (existingColors.includes(randomColor.toUpperCase())) {
-    randomColor = generateRandomColor();
-  }
+//   // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
+//   const existingColors = categoryStore.categories.map((c) =>
+//     c.colore.toUpperCase(),
+//   );
+//   while (existingColors.includes(randomColor.toUpperCase())) {
+//     randomColor = generateRandomColor();
+//   }
 
-  newCat.value.colore = randomColor;
-  isCategoryModalOpen.value = true;
-};
+//   newCat.value.colore = randomColor;
+//   isCategoryModalOpen.value = true;
+// };
 
-const saveCategory = async () => {
-  // Validazione: controlla che la descrizione non sia vuota
-  if (!newCat.value.descrizione.trim()) {
-    // || newCat.value.budget <= 0 per gestire eventualmente il budget
-    alert("Inserisci una descrizione valida per la categoria."); // e un budget valido.
-    return;
-  }
+// const saveCategory = async () => {
+//   // Validazione: controlla che la descrizione non sia vuota
+//   if (!newCat.value.descrizione.trim()) {
+//     // || newCat.value.budget <= 0 per gestire eventualmente il budget
+//     alert("Inserisci una descrizione valida per la categoria."); // e un budget valido.
+//     return;
+//   }
 
-  // Controllo se il colore è già in uso
-  const colorExists = categoryStore.categories.some(
-    (c) => c.colore === newCat.value.colore,
-  );
+//   // Controllo se il colore è già in uso
+//   const colorExists = categoryStore.categories.some(
+//     (c) => c.colore === newCat.value.colore,
+//   );
 
-  if (colorExists) {
-    alert(
-      "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!",
-    );
-    return;
-  }
+//   if (colorExists) {
+//     alert(
+//       "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!",
+//     );
+//     return;
+//   }
 
-  try {
-    // Passiamo solo la stringa della descrizione allo store
-    await categoryStore.addCategory({
-      descrizione: newCat.value.descrizione,
-      budget: newCat.value.budget,
-      colore: newCat.value.colore,
-    });
+//   try {
+//     // Passiamo solo la stringa della descrizione allo store
+//     await categoryStore.addCategory({
+//       descrizione: newCat.value.descrizione,
+//       budget: newCat.value.budget,
+//       colore: newCat.value.colore,
+//     });
 
-    // Reset e chiusura
-    isCategoryModalOpen.value = false;
-    newCat.value = {
-      descrizione: "",
-      codice: "",
-      budget: 0,
-      colore: "#4f46e5",
-    };
-    alert("Categoria creata con successo");
-  } catch (e: any) {
-    console.error(e);
-    // e.message in questo punto conterrà "La categoria $categoria esiste già" lanciato dallo store
-    alert(e.message || "Errore durante il salvataggio della categoria.");
-  }
-};
+//     // Reset e chiusura
+//     isCategoryModalOpen.value = false;
+//     newCat.value = {
+//       descrizione: "",
+//       codice: "",
+//       budget: 0,
+//       colore: "#4f46e5",
+//     };
+//     alert("Categoria creata con successo");
+//   } catch (e: any) {
+//     console.error(e);
+//     // e.message in questo punto conterrà "La categoria $categoria esiste già" lanciato dallo store
+//     alert(e.message || "Errore durante il salvataggio della categoria.");
+//   }
+// };
 
 // Funzione per testare
 const testCreaCategoria = async () => {
@@ -202,61 +202,61 @@ const testCreaCategoria = async () => {
 const showErrors = ref(false);
 
 // --- AZIONI ---
-const handleSave = async () => {
-  // Attiviamo la visualizzazione degli errori grafici
-  showErrors.value = true;
+// const handleSave = async () => {
+//   // Attiviamo la visualizzazione degli errori grafici
+//   showErrors.value = true;
 
-  // Validazione descrizione
-  if (!newTransaction.value.title.trim()) {
-    triggerShakeForm();
-    return; // Il messaggio apparirà sotto l'input
-  }
+//   // Validazione descrizione
+//   if (!newTransaction.value.title.trim()) {
+//     triggerShakeForm();
+//     return; // Il messaggio apparirà sotto l'input
+//   }
 
-  // Validazione importo (ora gestita graficamente nel template)
-  if (newTransaction.value.amount === 0) {
-    triggerShakeForm();
-    return;
-  }
+//   // Validazione importo (ora gestita graficamente nel template)
+//   if (newTransaction.value.amount === 0) {
+//     triggerShakeForm();
+//     return;
+//   }
 
-  const selectedCategoryObj = categoryStore.categories.find(
-    (cat) => cat.descrizione === newTransaction.value.category,
-  );
+//   const selectedCategoryObj = categoryStore.categories.find(
+//     (cat) => cat.descrizione === newTransaction.value.category,
+//   );
 
-  if (!selectedCategoryObj) {
-    triggerShakeForm();
-    return;
-  }
+//   if (!selectedCategoryObj) {
+//     triggerShakeForm();
+//     return;
+//   }
 
-  try {
-    // 2. Prepariamo i dati nel formato Entity (con l'oggetto categoria)
-    const transactionData = {
-      title: newTransaction.value.title,
-      amount: newTransaction.value.amount,
-      date: newTransaction.value.date,
-      category: selectedCategoryObj, // Qui passiamo l'oggetto {id, descrizione, codice}
-    };
+//   try {
+//     // 2. Prepariamo i dati nel formato Entity (con l'oggetto categoria)
+//     const transactionData = {
+//       title: newTransaction.value.title,
+//       amount: newTransaction.value.amount,
+//       date: newTransaction.value.date,
+//       category: selectedCategoryObj, // Qui passiamo l'oggetto {id, descrizione, codice}
+//     };
 
-    // 2. Logica Unica: o Modifica o Aggiunta
-    if (isEditing.value && editingId.value) {
-      // Caso modifica: usiamo l'editingId esistente
-      await store.updateTransaction({
-        ...transactionData,
-        id: editingId.value,
-      } as Transaction);
-    } else {
-      // Caso nuova operazione: Non generiamo un nuovo ID: lo store userà il Mapper per inviare un DTO pulito.
-      // Quarkus riceverà solo title, amount, category e date.
-      await store.addTransaction(transactionData);
-    }
+//     // 2. Logica Unica: o Modifica o Aggiunta
+//     if (isEditing.value && editingId.value) {
+//       // Caso modifica: usiamo l'editingId esistente
+//       await store.updateTransaction({
+//         ...transactionData,
+//         id: editingId.value,
+//       } as Transaction);
+//     } else {
+//       // Caso nuova operazione: Non generiamo un nuovo ID: lo store userà il Mapper per inviare un DTO pulito.
+//       // Quarkus riceverà solo title, amount, category e date.
+//       await store.addTransaction(transactionData);
+//     }
 
-    // 3. // Reset degli errori e del form dopo il successo
-    showErrors.value = false;
-    cancelEdit();
-  } catch (error) {
-    console.error("Errore durante il salvataggio della transazione:", error);
-    alert("Si è verificato un errore durante il salvataggio.");
-  }
-};
+//     // 3. // Reset degli errori e del form dopo il successo
+//     showErrors.value = false;
+//     cancelEdit();
+//   } catch (error) {
+//     console.error("Errore durante il salvataggio della transazione:", error);
+//     alert("Si è verificato un errore durante il salvataggio.");
+//   }
+// };
 
 // Formattazione Euro
 const formatCurrency = (value: number) => {
@@ -266,35 +266,35 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const confirmDelete = async (transaction: Transaction) => {
-  // Messaggio di conferma dinamico
-  const message = `Sei sicuro di voler eliminare "${
-    transaction.title
-  }" di €${transaction.amount.toFixed(2)}?`;
+// const confirmDelete = async (transaction: Transaction) => {
+//   // Messaggio di conferma dinamico
+//   const message = `Sei sicuro di voler eliminare "${
+//     transaction.title
+//   }" di €${transaction.amount.toFixed(2)}?`;
 
-  if (window.confirm(message)) {
-    try {
-      await store.deleteTransaction(transaction.id);
-      // Opzionale: feedback di successo
-      console.log("Transazione eliminata");
-    } catch (error) {
-      alert("Non è stato possibile eliminare la transazione.");
-    }
-  }
-};
+//   if (window.confirm(message)) {
+//     try {
+//       await store.deleteTransaction(transaction.id);
+//       // Opzionale: feedback di successo
+//       console.log("Transazione eliminata");
+//     } catch (error) {
+//       alert("Non è stato possibile eliminare la transazione.");
+//     }
+//   }
+// };
 
-const handlePageChange = async (newPage: number) => {
-  await store.fetchTransactions({
-    title: filters.value.title,
-    category: filters.value.category,
-    paginazione: {
-      numeroPagina: newPage,
-      numeroElementiPerPagina: 10,
-    },
-  });
+// const handlePageChange = async (newPage: number) => {
+//   await store.fetchTransactions({
+//     title: filters.value.title,
+//     category: filters.value.category,
+//     paginazione: {
+//       numeroPagina: newPage,
+//       numeroElementiPerPagina: 10,
+//     },
+//   });
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
+//   window.scrollTo({ top: 0, behavior: "smooth" });
+// };
 
 // Stato per i filtri
 const filters = ref({
@@ -341,14 +341,14 @@ const resetFilters = async () => {
 };
 
 // Funzione per generare un colore HEX random
-const generateRandomColor = () => {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+// const generateRandomColor = () => {
+//   const letters = "0123456789ABCDEF";
+//   let color = "#";
+//   for (let i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// };
 </script>
 
 <template>
@@ -717,7 +717,7 @@ const generateRandomColor = () => {
     <!-- FINE LISTA TRANSAZIONI -->
   </main>
 
-  <div
+  <!-- <div
     v-if="isCategoryModalOpen"
     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   >
@@ -812,5 +812,5 @@ const generateRandomColor = () => {
         </button>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
