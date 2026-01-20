@@ -38,14 +38,19 @@ export const useCategoryStore = defineStore("category", () => {
     }
   };
 
-  const addCategory = async (catData: { descrizione: string, budget: number, colore: string }) => {
+  const addCategory = async (catData: {
+    descrizione: string;
+    budget: number;
+    colore: string;
+  }) => {
     try {
       // 1. Controllo univocità Descrizione (Case Insensitive)
       const isDuplicate = categories.value.some(
-        (cat) => cat.descrizione.toLowerCase() === catData.descrizione.toLowerCase()
+        (cat) =>
+          cat.descrizione.toLowerCase() === catData.descrizione.toLowerCase()
       );
 
-      if(isDuplicate){
+      if (isDuplicate) {
         // si lancia un errore specifico che si potrebbe catturare nella view
         throw new Error(`La categoria "${catData.descrizione}" esiste già.`);
       }
@@ -59,7 +64,7 @@ export const useCategoryStore = defineStore("category", () => {
         descrizione: catData.descrizione,
         codice: code,
         budget: catData.budget,
-        colore: catData.colore
+        colore: catData.colore,
       };
 
       // 4. Creiamo DTO e lo inviamo
@@ -70,10 +75,37 @@ export const useCategoryStore = defineStore("category", () => {
 
       // 5. Refresh della lista
       await fetchCategories();
-      
     } catch (error) {
       console.error("Errore durante l'aggiunta:", error);
       throw error;
+    }
+  };
+
+  const updateCategory = async (cat: Category) => {
+    // Implementa la logica di aggiornamento categoria
+    try {
+      // convertiamo l'entity in dto
+      const dto = CategoryMapper.toDTO(cat);
+
+      // chiamata PUT al BE con l'ID della categoria
+      await api.put(`/categories/${cat.id}`, dto);
+      // refresh della lista
+      await fetchCategories();
+    } catch (error) {
+      console.error("Errore durante la modifica della categoria:", error);
+      throw error;
+    }
+  };
+
+  const deleteCategory = async (catId: string) => {
+    // Implementa la logica di eliminazione categoria
+    try {
+      // chiamata DELETE al BE con l'ID della categoria
+      await api.delete(`/categories/${catId}`);
+      // refresh della lista
+      await fetchCategories();
+    } catch (error) {
+      console.error("Errore durante l'eliminazione della categoria:", error);
     }
   };
 
@@ -83,5 +115,7 @@ export const useCategoryStore = defineStore("category", () => {
     nextAvailableCode,
     fetchCategories,
     addCategory,
+    updateCategory,
+    deleteCategory,
   };
 });

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { RouterLink } from "vue-router";
 import { Pencil, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
@@ -16,6 +17,8 @@ import {
   Plus,
   Trash2,
   Calendar,
+  Settings,
+  Layers
 } from "lucide-vue-next";
 
 const store = useExpenseStore();
@@ -117,7 +120,7 @@ const openCategoryModal = () => {
 
   // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
   const existingColors = categoryStore.categories.map((c) =>
-    c.colore.toUpperCase()
+    c.colore.toUpperCase(),
   );
   while (existingColors.includes(randomColor.toUpperCase())) {
     randomColor = generateRandomColor();
@@ -129,19 +132,20 @@ const openCategoryModal = () => {
 
 const saveCategory = async () => {
   // Validazione: controlla che la descrizione non sia vuota
-  if (!newCat.value.descrizione.trim()) { // || newCat.value.budget <= 0 per gestire eventualmente il budget
+  if (!newCat.value.descrizione.trim()) {
+    // || newCat.value.budget <= 0 per gestire eventualmente il budget
     alert("Inserisci una descrizione valida per la categoria."); // e un budget valido.
     return;
   }
 
   // Controllo se il colore è già in uso
   const colorExists = categoryStore.categories.some(
-    (c) => c.colore === newCat.value.colore
+    (c) => c.colore === newCat.value.colore,
   );
 
   if (colorExists) {
     alert(
-      "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!"
+      "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!",
     );
     return;
   }
@@ -211,7 +215,7 @@ const handleSave = async () => {
   }
 
   const selectedCategoryObj = categoryStore.categories.find(
-    (cat) => cat.descrizione === newTransaction.value.category
+    (cat) => cat.descrizione === newTransaction.value.category,
   );
 
   if (!selectedCategoryObj) {
@@ -346,10 +350,17 @@ const generateRandomColor = () => {
 <template>
   <main class="max-w-5xl mx-auto p-6">
     <header class="mb-10">
-      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
-        ExpensePulse
-      </h1>
-      <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+          ExpensePulse
+        </h1>
+        <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
+      </div>
+
+      <RouterLink to="/categories" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
+        <Layers :size="18" />
+        Gestione Categorie
+      </RouterLink>
     </header>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
