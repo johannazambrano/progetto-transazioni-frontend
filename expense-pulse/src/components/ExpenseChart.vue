@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Pie } from "vue-chartjs";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, Colors } from "chart.js";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Colors,
+} from "chart.js";
 import { useExpenseStore } from "@/stores/expenseStore";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Colors);
@@ -21,21 +27,36 @@ interface PieChartData {
 const hasData = computed(() => store.transactions.some((t) => t.amount < 0));
 
 const chartData = computed<PieChartData>(() => {
-  const expenses = store.transactions.filter(t => t.amount < 0);
-  const dataMap: Record<string, number> = {};
-  
-  expenses.forEach(t => {
+  const expenses = store.transactions.filter((t) => t.amount < 0);
+  const dataMap: Record<string, { total: number; color: string }> = {};
+
+  expenses.forEach((t) => {
     const catName = t.category.descrizione;
-    dataMap[catName] = (dataMap[catName] || 0) + Math.abs(t.amount);
+    const catColor = t.category.colore || "#CBD5E1"; // Fallback se il colore è null
+
+    if (!dataMap[catName]) {
+      dataMap[catName] = { total: 0, color: catColor };
+    }
+    dataMap[catName].total += Math.abs(t.amount);
   });
 
+  // Trasformiamo la mappa in un array di oggetti
+  const chartItems = Object.entries(dataMap).map(([label, info]) => ({
+    label,
+    total: info.total,
+    color: info.color,
+  }));
+
   return {
-    labels: Object.keys(dataMap),
-    datasets: [{
-      data: Object.values(dataMap),
-      backgroundColor: ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#3b82f6'],
-      borderWidth: 0,
-    }]
+    labels: chartItems.map((i) => i.label),
+    datasets: [
+      {
+        data: chartItems.map((i) => i.total),
+        backgroundColor: chartItems.map((i) => i.color),
+        borderWidth: 2,
+        borderColor: "#ffffff",
+      },
+    ],
   };
 });
 
