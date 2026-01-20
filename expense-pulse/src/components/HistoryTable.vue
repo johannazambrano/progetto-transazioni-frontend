@@ -1,12 +1,71 @@
 <script setup lang="ts">
-import { Calendar, Trash2, ArrowUpCircle, ArrowDownCircle } from "lucide-vue-next";
+// import { Calendar, Trash2, ArrowUpCircle, ArrowDownCircle } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
-import AppPagination from "@/components/AppPagination.vue";
+// import AppPagination from "@/components/AppPagination.vue";
+import { ref } from "vue";
+import { useCategoryStore } from "@/stores/categoryStore";
 
+// --- STORE ---
 const store = useExpenseStore();
+const categoryStore = useCategoryStore();
 
+
+// ---VARIABILI ---
+const isShakingSearch = ref(false);
+// Stato per i filtri
+const filters = ref({
+  title: "",
+  category: "",
+  startDate: "",
+  endDate: "",
+});
+
+
+// --- FUNZIONI ---
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(value);
+};
+
+// Reset dei filtri
+const resetFilters = async () => {
+  filters.value = { title: "", category: "", startDate: "", endDate: "" };
+  await store.fetchTransactions();
+};
+
+// Trigger per la Ricerca Avanzata
+const triggerShakeSearch = () => {
+  isShakingSearch.value = true;
+  setTimeout(() => (isShakingSearch.value = false), 400);
+};
+
+// Funzione per applicare i filtri
+const applyFilters = async () => {
+  const { startDate, endDate } = filters.value;
+
+  // 1. Controllo Intervallo Completo: Se uno dei due è presente, serve anche l'altro
+  if ((startDate && !endDate) || (!startDate && endDate)) {
+    triggerShakeSearch();
+    return; // Usciamo silenziosamente, il messaggio apparirà nel template
+  }
+
+  // 2. Controllo Coerenza Date: Fine deve essere >= Inizio
+  if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+    // Qui non facciamo nulla, lasciamo che il messaggio di errore nel template avvisi l'utente
+    triggerShakeSearch();
+    return;
+  }
+
+  // Passiamo l'intero oggetto filters. Lo store si occuperà di pulire le stringhe vuote.
+  await store.fetchTransactions({
+    title: filters.value.title,
+    category: filters.value.category,
+    startDate: filters.value.startDate || undefined,
+    endDate: filters.value.endDate || undefined,
+    paginazione: {
+      numeroPagina: 0,
+      numeroElementiPerPagina: 10,
+    },
+  });
 };
 </script>
 

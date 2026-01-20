@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { RouterLink } from "vue-router";
-import { Pencil, X } from "lucide-vue-next";
+// import { Pencil, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
-import type { Transaction } from "../models/entities/Transaction";
+// import type { Transaction } from "../models/entities/Transaction";
 import { categoryService } from "@/services/categoryService";
 import { onMounted } from "vue";
 import ExpenseChart from "@/components/ExpenseChart.vue";
 import TimeChart from "@/components/TimeChart.vue";
-import AppPagination from "@/components/AppPagination.vue";
+// import AppPagination from "@/components/AppPagination.vue";
 import {
   Wallet,
   ArrowUpCircle,
@@ -69,39 +69,39 @@ const isShakingSearch = ref(false);
 // };
 
 // Trigger per la Ricerca Avanzata
-const triggerShakeSearch = () => {
-  isShakingSearch.value = true;
-  setTimeout(() => (isShakingSearch.value = false), 400);
-};
+// const triggerShakeSearch = () => {
+//   isShakingSearch.value = true;
+//   setTimeout(() => (isShakingSearch.value = false), 400);
+// };
 
 // Funzione per caricare i dati nel form
-const startEdit = (transaction: Transaction) => {
-  isEditing.value = true;
-  editingId.value = transaction.id;
-  // Quando carichiamo i dati per la modifica, estraiamo la descrizione (stringa) dall'oggetto
-  newTransaction.value = {
-    title: transaction.title,
-    amount: transaction.amount,
-    category: transaction.category.descrizione,
-    date: transaction.date,
-  };
-};
+// const startEdit = (transaction: Transaction) => {
+//   isEditing.value = true;
+//   editingId.value = transaction.id;
+//   // Quando carichiamo i dati per la modifica, estraiamo la descrizione (stringa) dall'oggetto
+//   newTransaction.value = {
+//     title: transaction.title,
+//     amount: transaction.amount,
+//     category: transaction.category.descrizione,
+//     date: transaction.date,
+//   };
+// };
 
 //scroll automatico verso il form
 window.scrollTo({ top: 0, behavior: "smooth" });
 
 // Funzione per annullare la modifica
-const cancelEdit = () => {
-  isEditing.value = false;
-  editingId.value = null;
-  showErrors.value = false; // Reset stato errore
-  newTransaction.value = {
-    title: "",
-    amount: 0,
-    category: "Altro",
-    date: new Date().toISOString().split("T")[0] as string,
-  };
-};
+// const cancelEdit = () => {
+//   isEditing.value = false;
+//   editingId.value = null;
+//   showErrors.value = false; // Reset stato errore
+//   newTransaction.value = {
+//     title: "",
+//     amount: 0,
+//     category: "Altro",
+//     date: new Date().toISOString().split("T")[0] as string,
+//   };
+// };
 
 // Variabile per capire se il modale è attivo o no
 // const isCategoryModalOpen = ref(false);
@@ -259,12 +259,12 @@ const showErrors = ref(false);
 // };
 
 // Formattazione Euro
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
+// const formatCurrency = (value: number) => {
+//   return new Intl.NumberFormat("it-IT", {
+//     style: "currency",
+//     currency: "EUR",
+//   }).format(value);
+// };
 
 // const confirmDelete = async (transaction: Transaction) => {
 //   // Messaggio di conferma dinamico
@@ -305,40 +305,40 @@ const filters = ref({
 });
 
 // Funzione per applicare i filtri
-const applyFilters = async () => {
-  const { startDate, endDate } = filters.value;
+// const applyFilters = async () => {
+//   const { startDate, endDate } = filters.value;
 
-  // 1. Controllo Intervallo Completo: Se uno dei due è presente, serve anche l'altro
-  if ((startDate && !endDate) || (!startDate && endDate)) {
-    triggerShakeSearch();
-    return; // Usciamo silenziosamente, il messaggio apparirà nel template
-  }
+//   // 1. Controllo Intervallo Completo: Se uno dei due è presente, serve anche l'altro
+//   if ((startDate && !endDate) || (!startDate && endDate)) {
+//     triggerShakeSearch();
+//     return; // Usciamo silenziosamente, il messaggio apparirà nel template
+//   }
 
-  // 2. Controllo Coerenza Date: Fine deve essere >= Inizio
-  if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-    // Qui non facciamo nulla, lasciamo che il messaggio di errore nel template avvisi l'utente
-    triggerShakeSearch();
-    return;
-  }
+//   // 2. Controllo Coerenza Date: Fine deve essere >= Inizio
+//   if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+//     // Qui non facciamo nulla, lasciamo che il messaggio di errore nel template avvisi l'utente
+//     triggerShakeSearch();
+//     return;
+//   }
 
-  // Passiamo l'intero oggetto filters. Lo store si occuperà di pulire le stringhe vuote.
-  await store.fetchTransactions({
-    title: filters.value.title,
-    category: filters.value.category,
-    startDate: filters.value.startDate || undefined,
-    endDate: filters.value.endDate || undefined,
-    paginazione: {
-      numeroPagina: 0,
-      numeroElementiPerPagina: 10,
-    },
-  });
-};
+//   // Passiamo l'intero oggetto filters. Lo store si occuperà di pulire le stringhe vuote.
+//   await store.fetchTransactions({
+//     title: filters.value.title,
+//     category: filters.value.category,
+//     startDate: filters.value.startDate || undefined,
+//     endDate: filters.value.endDate || undefined,
+//     paginazione: {
+//       numeroPagina: 0,
+//       numeroElementiPerPagina: 10,
+//     },
+//   });
+// };
 
 // Reset dei filtri
-const resetFilters = async () => {
-  filters.value = { title: "", category: "", startDate: "", endDate: "" };
-  await store.fetchTransactions();
-};
+// const resetFilters = async () => {
+//   filters.value = { title: "", category: "", startDate: "", endDate: "" };
+//   await store.fetchTransactions();
+// };
 
 // Funzione per generare un colore HEX random
 // const generateRandomColor = () => {
@@ -526,7 +526,7 @@ const resetFilters = async () => {
     <TransactionForm />
 
     <!-- INIZIO RICERCA AVANZATA -->
-    <section
+    <!-- <section
       class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 transition-all"
       :class="{ 'animate-shake border-red-200': isShakingSearch }"
     >
@@ -627,8 +627,8 @@ const resetFilters = async () => {
           </p>
         </div>
       </div>
-    </section>
-    <!-- <HistoryTable /> -->
+    </section> -->
+    <HistoryTable />
     <!-- FINE RICERCA AVANZATA -->
 
     <!-- INIZIO LISTA TRANSAZIONI -->
