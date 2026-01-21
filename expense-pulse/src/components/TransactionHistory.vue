@@ -11,28 +11,28 @@ import type { Transaction } from "@/models/entities/Transaction";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
 
-
+// --- STORE ---
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
 
 
+// --- VARIABILI ---
 const isTransactionModalOpen = ref(false);
 const editTransaction = ref<Transaction>();
 
 
+// --- FUNZIONI ---
 // Funzione per generare un colore HEX random
 const generateRandomColor = () => {
-const letters = "0123456789ABCDEF";
-let color = "#";
-for (let i = 0; i < 6; i++) {
-  color += letters[Math.floor(Math.random() * 16)];
-}
-return color;
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 
-/**
- * Utility: Formattazione Valuta locale
- */
+// Utility: Formattazione Valuta locale
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
@@ -40,10 +40,8 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-/**
- * Eventi: Emettiamo gli eventi al padre (HomeView) invece di gestire
- * la logica complessa qui, mantenendo il componente "Snello".
- */
+// Eventi: Emettiamo gli eventi al padre (HomeView) invece di gestire
+// la logica complessa qui, mantenendo il componente "Snello".
 const emit = defineEmits(['edit', 'delete']);
 
 const handlePageChange = (p: number) => {
@@ -111,7 +109,7 @@ const saveTransaction = async () => {
       id: "",
       title: "",
       amount: 0,
-      category:  {
+      category: {
         id: "",
         descrizione: "",
         codice: "",
@@ -130,173 +128,65 @@ const saveTransaction = async () => {
 </script>
 
 <template>
-  <!-- <div class="flex flex-col h-full bg-white">
-    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+  <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
       <h2 class="text-xl font-bold text-gray-800">Cronologia</h2>
-      <span class="text-sm text-gray-500">
-        {{ store.transactions.length }} operazioni
-      </span>
+      <span class="text-sm text-gray-500">{{ store.transactions.length }} operazioni</span>
     </div>
 
-    <div class="flex-1 overflow-y-auto min-h-0">
-      <ul v-if="store.transactions.length > 0" class="divide-y divide-gray-100">
-        <li
-          v-for="t in store.transactions"
-          :key="t.id"
-          class="p-5 hover:bg-gray-50 transition-colors flex items-center justify-between group"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              :class="[
-                'p-3 rounded-2xl transition-all',
-                t.amount > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-100 text-rose-500',
-              ]"
-            >
-              <component
-                :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle"
-                :size="24"
-              />
-            </div>
-            <div>
-              <p class="font-bold text-gray-900 line-clamp-1">{{ t.title }}</p>
-              <p class="text-xs text-gray-400 flex items-center gap-1">
-                <Calendar :size="12" /> {{ t.date }} • {{ t.category.descrizione }}
-              </p>
-            </div>
+    <ul class="divide-y divide-gray-100">
+      <li v-for="t in store.transactions" :key="t.id"
+        class="p-5 hover:bg-gray-50 transition-colors flex items-center justify-between group">
+        <div class="flex items-center gap-4">
+          <div :class="[
+            'p-3 rounded-2xl transition-all',
+            t.amount > 0
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-rose-100 text-rose-500',
+          ]">
+            <component :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle" :size="24" />
           </div>
-
-          <div class="flex items-center gap-2">
-            <span
-              :class="[
-                'font-black text-lg mr-4 whitespace-nowrap',
-                t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
-              ]"
-            >
-              {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
-            </span>
-
-            <div class="flex opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                @click="startEdit(t)"
-                class="text-gray-300 hover:text-amber-500 transition-all p-2"
-              >
-                <Pencil :size="18" />
-              </button>
-              <button
-                @click="confirmDelete(t)"
-                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 :size="18" />
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
-
-      <div v-else class="h-full flex flex-col items-center justify-center p-10 text-center text-gray-400">
-        <p>Non ci sono ancora transazioni.</p>
-        <p class="text-sm">Inizia aggiungendone una!</p>
-      </div>
-    </div>
-
-    <div class="p-4 border-t border-gray-100 bg-gray-50">
-      <AppPagination
-        :pagination="store.pagination"
-        @change="handlePageChange"
-      />
-    </div>
-  </div> -->
-<section
-      class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-    >
-      <div
-        class="p-6 border-b border-gray-100 flex justify-between items-center"
-      >
-        <h2 class="text-xl font-bold text-gray-800">Cronologia</h2>
-        <span class="text-sm text-gray-500"
-          >{{ store.transactions.length }} operazioni</span
-        >
-      </div>
-
-      <ul class="divide-y divide-gray-100">
-        <li
-          v-for="t in store.transactions"
-          :key="t.id"
-          class="p-5 hover:bg-gray-50 transition-colors flex items-center justify-between group"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              :class="[
-                'p-3 rounded-2xl transition-all',
-                t.amount > 0
-                  ? 'bg-emerald-50 text-emerald-600'
-                  : 'bg-rose-100 text-rose-500',
-              ]"
-            >
-              <component
-                :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle"
-                :size="24"
-              />
-            </div>
-            <div>
-              <p class="font-bold text-gray-900">{{ t.title }}</p>
-              <p class="text-xs text-gray-400 flex items-center gap-1">
-                <Calendar :size="12" /> {{ t.date }} •
-                {{ t.category.descrizione }}
-              </p>
-            </div>
-          </div>
-          <!-- <div class="flex items-center gap-2">
-            <p class="font-bold text-gray-900">
+          <div>
+            <p class="font-bold text-gray-900">{{ t.title }}</p>
+            <p class="text-xs text-gray-400 flex items-center gap-1">
+              <Calendar :size="12" /> {{ t.date }} •
               {{ t.category.descrizione }}
             </p>
-          </div> -->
-
-          <div class="flex items-center gap-2">
-            <span
-              :class="[
-                'font-black text-lg mr-4',
-                t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
-              ]"
-            >
-              {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
-            </span>
-
-            <button
-              @click="startEdit(t)"
-              class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2"
-            >
-              <Pencil :size="18" />
-            </button>
-
-            <button
-              @click="confirmDelete(t)"
-              class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Elimina transazione"
-            >
-              <Trash2 :size="18" />
-            </button>
           </div>
-        </li>
-      </ul>
+        </div>
+        <div class="flex items-center gap-2">
+          <span :class="[
+            'font-black text-lg mr-4',
+            t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
+          ]">
+            {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
+          </span>
 
-      <AppPagination
-        :pagination="store.pagination"
-        @change="handlePageChange"
-      />
+          <button @click="startEdit(t)"
+            class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2">
+            <Pencil :size="18" />
+          </button>
 
-      <div
-        v-if="store.transactions.length === 0"
-        class="p-20 text-center text-gray-400"
-      >
-        <p>Non ci sono ancora transazioni. Inizia aggiungendone una!</p>
-      </div>
-    </section>
-      <div v-if="isTransactionModalOpen"
+          <button @click="confirmDelete(t)"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Elimina transazione">
+            <Trash2 :size="18" />
+          </button>
+        </div>
+      </li>
+    </ul>
+
+    <AppPagination :pagination="store.pagination" @change="handlePageChange" />
+
+    <div v-if="store.transactions.length === 0" class="p-20 text-center text-gray-400">
+      <p>Non ci sono ancora transazioni. Inizia aggiungendone una!</p>
+    </div>
+  </section>
+  <div v-if="isTransactionModalOpen"
     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold text-gray-900">Nuova Categoria</h3>
+        <h3 class="text-xl font-bold text-gray-900">Modifica transazione</h3>
         <button @click="isTransactionModalOpen = false" class="text-gray-400 hover:text-gray-600">
           <X :size="24" />
         </button>
@@ -306,38 +196,19 @@ const saveTransaction = async () => {
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Titolo</label>
           <input v-model="editTransaction!.title" type="text" placeholder="Spesa, aperitivo, benzina, ecc"
-            class="w-full p-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed" />
+            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Importo</label>
-          <input v-model="editTransaction!.amount" type="text" placeholder="500.00"
+          <input v-model="editTransaction!.amount" type="number" placeholder="500.00"
             class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Categoria</label>
-            <input v-model.number="editTransaction!.category" type="number" placeholder=""
+            <input v-model="editTransaction!.category.descrizione" type="text" placeholder="Categoria"
               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
-          <!-- <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Colore Identificativo</label>
-            <div class="flex items-center gap-3">
-              <div class="relative group">
-                <input v-model="editTransaction.colore" type="color"
-                  class="w-12 h-12 p-1 bg-white border border-gray-200 rounded-xl cursor-pointer" />
-              </div>
-
-              <div class="flex flex-col">
-                <span class="text-xs font-mono font-bold text-gray-600">{{
-                  editTransaction.colore.toUpperCase()
-                }}</span>
-                <button @click="editTransaction.colore = generateRandomColor()" type="button"
-                  class="text-[10px] text-indigo-600 hover:underline flex items-center gap-1">
-                  Cambia colore
-                </button>
-              </div>
-            </div>
-          </div> -->
         </div>
       </div>
 
@@ -362,14 +233,17 @@ const saveTransaction = async () => {
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
+
 .overflow-y-auto::-webkit-scrollbar-thumb {
   background-color: #e5e7eb;
   border-radius: 10px;
 }
+
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;  
+  -webkit-box-orient: vertical;
   overflow: hidden;
+  line-clamp: 1;
 }
 </style>
