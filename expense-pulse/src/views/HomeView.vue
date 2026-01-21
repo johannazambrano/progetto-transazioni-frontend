@@ -22,9 +22,11 @@ import {
 } from "lucide-vue-next";
 import BalanceCards from "@/components/BalanceCards.vue";
 import TransactionForm from "@/components/TransactionForm.vue";
-import HistoryTable from "@/components/HistoryTable.vue";
+import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
+import type { Transaction } from "@/models/entities/Transaction";
 
+// --- STORE ---
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
 
@@ -37,6 +39,7 @@ interface TransactionForm {
   date: string;
 }
 
+// --- VARIABILI ---
 // Ora TypeScript non darà più errore perché 'category' è dichiarata come string
 const newTransaction = ref<TransactionForm>({
   title: "",
@@ -44,7 +47,16 @@ const newTransaction = ref<TransactionForm>({
   category: "Altro",
   date: new Date().toISOString().split("T")[0] as string,
 });
+// Variabile per capire se siamo in modalità modifica
+const isEditing = ref(false);
+const transactionToEdit = ref<Transaction | null>(null);
+// Variabile per attivare l'effetto shake sugli errori
+// const isShakingForm = ref(false);
+const isShakingSearch = ref(false);
+const showErrors = ref(false);
 
+
+// --- FUNZIONI ---
 onMounted(async () => {
   store.fetchTransactions();
   //testCreaCategoria();
@@ -52,14 +64,6 @@ onMounted(async () => {
   categoryStore.nextAvailableCode;
   console.log("STEP 1: OnMounted -> chiamo ", categoryStore.nextAvailableCode);
 });
-
-// Variabile per capire se siamo in modalità modifica
-const isEditing = ref(false);
-const editingId = ref<string | null>(null);
-
-// Variabile per attivare l'effetto shake sugli errori
-// const isShakingForm = ref(false);
-const isShakingSearch = ref(false);
 
 // Funzione per attivare l'effetto shake
 // Trigger per il form Nuova Operazione
@@ -89,6 +93,17 @@ const isShakingSearch = ref(false);
 
 //scroll automatico verso il form
 window.scrollTo({ top: 0, behavior: "smooth" });
+
+// Funzione chiamata quando History emette 'edit'
+const handleEditRequest = (transaction: Transaction) => {
+  transactionToEdit.value = transaction;
+  // Opzionale: scroll al form o apertura modale
+};
+
+// Reset dopo il salvataggio
+const handleSaveSuccess = () => {
+  transactionToEdit.value = null;
+};
 
 // Funzione per annullare la modifica
 // const cancelEdit = () => {
@@ -199,7 +214,6 @@ const testCreaCategoria = async () => {
   }
 };
 
-const showErrors = ref(false);
 
 // --- AZIONI ---
 // const handleSave = async () => {
@@ -297,12 +311,12 @@ const showErrors = ref(false);
 // };
 
 // Stato per i filtri
-const filters = ref({
-  title: "",
-  category: "",
-  startDate: "",
-  endDate: "",
-});
+// const filters = ref({
+//   title: "",
+//   category: "",
+//   startDate: "",
+//   endDate: "",
+// });
 
 // Funzione per applicare i filtri
 // const applyFilters = async () => {
@@ -361,12 +375,13 @@ const filters = ref({
         <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
       </div>
 
-      <RouterLink to="/categories" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
+      <RouterLink to="/categories"
+        class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
         <Layers :size="18" />
         Gestione Categorie
       </RouterLink>
     </header>
-    <BalanceCards/>
+    <BalanceCards />
     <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div class="flex items-center justify-between mb-2">
@@ -523,7 +538,11 @@ const filters = ref({
         * Usa il segno meno (es. -50) per registrare una spesa.
       </p>
     </section> -->
-    <TransactionForm />
+    <TransactionForm 
+    :edit-data="transactionToEdit"
+    @success="transactionToEdit = null" 
+    @cancel="transactionToEdit = null"
+    />
 
     <!-- INIZIO RICERCA AVANZATA -->
     <!-- <section
@@ -628,7 +647,7 @@ const filters = ref({
         </div>
       </div>
     </section> -->
-    <HistoryTable />
+    <ResearchTable />
     <!-- FINE RICERCA AVANZATA -->
 
     <!-- INIZIO LISTA TRANSAZIONI -->

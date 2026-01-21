@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Pencil, Plus, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
@@ -26,6 +26,10 @@ const newTransaction = ref({
   category: "Altro",
   date: new Date().toISOString().split("T")[0],
 });
+const props = defineProps<{
+  editData?: Transaction | null
+}>();
+const emit = defineEmits(['success', 'cancel', 'edit']);
 
 
 // --- FUNZIONI ---
@@ -188,6 +192,27 @@ const saveCategory = async () => {
     alert(e.message || "Errore durante il salvataggio della categoria.");
   }
 };
+
+// Osserva se cambiano i dati da modificare
+watch(() => props.editData, (newData) => {
+  if (newData) {
+    // Creiamo un oggetto compatibile con la struttura del Form
+    newTransaction.value = {
+      title: newData.title,
+      amount: newData.amount,
+      // Estraiamo solo la descrizione o l'id perché il form usa una stringa
+      category: typeof newData.category === 'object' 
+                ? newData.category.descrizione 
+                : newData.category,
+      date: newData.date
+    };
+    // Settiamo gli stati di editing
+    editingId.value = newData.id; // Salviamo l'ID per sapere cosa aggiornare dopo
+    isEditing.value = true;
+  }else {
+    cancelEdit(); // Se editData diventa null, puliamo il form
+  }
+}, { deep: true });
 </script>
 
 <template>
