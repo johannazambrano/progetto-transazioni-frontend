@@ -12,14 +12,15 @@ const editingId = ref<string | null>(null);
 const showErrors = ref(false);
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
-const isCategoryModalOpen = ref(false); // Variabile per capire se il modale è attivo o no
+const isCategoryModalOpen = ref(false); 
 const newCat = ref({
   descrizione: "",
   codice: "",
   budget: 0,
   colore: "#4f46e5", // Colore di default (Indigo)
 });
-// Stato interno del form (estratto da HomeView)
+
+// Stato interno del form
 const newTransaction = ref({
   title: "",
   amount: 0,
@@ -30,18 +31,6 @@ const props = defineProps<{
   editData?: Transaction | null
 }>();
 const emit = defineEmits(['success', 'cancel', 'edit']);
-
-
-// --- FUNZIONI ---
-// const handleAdd = async () => {
-//   if (!newTransaction.value.title.trim() || newTransaction.value.amount === 0) {
-//     isShakingForm.value = true;
-//     setTimeout(() => (isShakingForm.value = false), 400);
-//     return;
-//   }
-//   // Qui va la logica handleSave originale...
-//   console.log("Salvataggio transazione...");
-// };
 
 // Funzione per generare un colore HEX random
 const generateRandomColor = () => {
@@ -56,7 +45,6 @@ const generateRandomColor = () => {
 const openCategoryModal = () => {
   // Si imposta automaticamente il codice restituito dallo store
   newCat.value.codice = categoryStore.nextAvailableCode;
-  console.log("category codice:", categoryStore.nextAvailableCode);
   newCat.value.descrizione = "";
   newCat.value.budget = 0;
   isCategoryModalOpen.value = true;
@@ -103,7 +91,7 @@ const handleSave = async () => {
     return; // Il messaggio apparirà sotto l'input
   }
 
-  // Validazione importo (ora gestita graficamente nel template)
+  // Validazione importo
   if (newTransaction.value.amount === 0) {
     triggerShakeForm();
     return;
@@ -119,12 +107,12 @@ const handleSave = async () => {
   }
 
   try {
-    // 2. Prepariamo i dati nel formato Entity (con l'oggetto categoria)
+    // 2. Prepariamo i dati nel formato Entity 
     const transactionData = {
       title: newTransaction.value.title,
       amount: newTransaction.value.amount,
       date: newTransaction.value.date!,
-      category: selectedCategoryObj, // Qui passiamo l'oggetto {id, descrizione, codice}
+      category: selectedCategoryObj, 
     };
 
     // 2. Logica Unica: o Modifica o Aggiunta
@@ -188,7 +176,6 @@ const saveCategory = async () => {
     alert("Categoria creata con successo");
   } catch (e: any) {
     console.error(e);
-    // e.message in questo punto conterrà "La categoria $categoria esiste già" lanciato dallo store
     alert(e.message || "Errore durante il salvataggio della categoria.");
   }
 };
@@ -216,21 +203,6 @@ watch(() => props.editData, (newData) => {
 </script>
 
 <template>
-  <!-- <section class="p-6 h-full bg-white transition-all" :class="{ 'animate-shake border-red-200': isShaking }">
-    <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
-      <Plus class="text-indigo-600" :size="18" /> Nuova Operazione
-    </h2>
-    <div class="grid grid-cols-1 gap-4">
-      <input v-model="newTransaction.title" type="text" placeholder="Descrizione" class="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" />
-      <input v-model.number="newTransaction.amount" type="number" placeholder="Importo" class="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" />
-      <select v-model="newTransaction.category" class="p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none">
-        <option v-for="cat in categoryStore.categories" :key="cat.id" :value="cat.descrizione">{{ cat.descrizione }}</option>
-      </select>
-      <button @click="handleAdd" class="bg-indigo-600 text-white p-3 rounded-xl font-bold hover:bg-indigo-700 transition-all">
-        Aggiungi
-      </button>
-    </div>
-  </section> -->
   <section class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
     :class="{ 'animate-shake border-red-200': isShakingForm }">
     <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
