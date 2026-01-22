@@ -1,14 +1,11 @@
 <script setup lang="ts">
-// import { Calendar, Trash2, ArrowUpCircle, ArrowDownCircle } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
-// import AppPagination from "@/components/AppPagination.vue";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
 
 // --- STORE ---
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
-
 
 // ---VARIABILI ---
 const isShakingSearch = ref(false);
@@ -22,10 +19,6 @@ const filters = ref({
 
 
 // --- FUNZIONI ---
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(value);
-};
-
 // Reset dei filtri
 const resetFilters = async () => {
   filters.value = { title: "", category: "", startDate: "", endDate: "" };
@@ -45,12 +38,11 @@ const applyFilters = async () => {
   // 1. Controllo Intervallo Completo: Se uno dei due è presente, serve anche l'altro
   if ((startDate && !endDate) || (!startDate && endDate)) {
     triggerShakeSearch();
-    return; // Usciamo silenziosamente, il messaggio apparirà nel template
+    return; 
   }
 
   // 2. Controllo Coerenza Date: Fine deve essere >= Inizio
   if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
-    // Qui non facciamo nulla, lasciamo che il messaggio di errore nel template avvisi l'utente
     triggerShakeSearch();
     return;
   }
