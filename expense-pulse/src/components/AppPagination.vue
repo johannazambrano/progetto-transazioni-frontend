@@ -9,10 +9,6 @@ defineProps<{
 const emit = defineEmits(['change']);
 </script>
 
-currentPage: number;
-    totalPages: number;
-    totalElements: number;
-    pageSize: number;
 <template>
   <div v-if="pagination && pagination.totalPages > 1" class="flex items-center justify-center gap-4 mt-8 py-4">
     <button 
