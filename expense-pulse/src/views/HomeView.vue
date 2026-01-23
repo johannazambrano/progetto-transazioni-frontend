@@ -42,7 +42,7 @@ const componentMap: Record<string, Component> = {
 
 // Layout senza riferimenti ai componenti
 const layout = ref<LayoutItem[]>([
-  {i: "balance",x: 0,y: 0,w: 12,h: 4,minW: 8,maxW: 12,minH: 3,maxH: 6,static: false},
+  {i: "balance",x: 0,y: 0,w: 12,h: 3,minW: 8,maxW: 12,minH: 3,maxH: 3,static: false},
   {i: "expenseChart",x: 0,y: 4,w: 6,h: 9,minW: 4,maxW: 12,minH: 6,maxH: 12,static: false},
   {i: "timeChart",x: 6,y: 4,w: 6,h: 9,minW: 5,maxW: 12,minH: 9,maxH: 12,static: false},
   {i: "transactionForm",x: 0,y: 12,w: 12,h: 5,minW: 8,maxW: 12,minH: 5,maxH: 5,static: false},

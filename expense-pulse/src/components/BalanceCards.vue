@@ -14,7 +14,7 @@ const formatCurrency = (value: number) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full px-0">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full px-0 py-0">
     <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-center">
       <div class="flex items-center justify-between mb-1">
         <span class="text-gray-500 text-xs font-bold uppercase">Saldo Totale</span>
