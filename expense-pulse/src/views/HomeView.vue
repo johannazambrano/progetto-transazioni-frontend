@@ -11,6 +11,7 @@ import TransactionForm from "@/components/TransactionForm.vue";
 import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
 import { GridLayout, GridItem } from "vue3-grid-layout-next";
+import Header from "@/components/Header.vue";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -77,13 +78,13 @@ const toggleEditMode = () => {
 
 <template>
   <main class="max-w-5xl mx-auto p-6">
-    <header class="mb-10 flex justify-between items-center">
+    <!-- <header class="mb-10 flex justify-between items-center">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 tracking-tight">ExpensePulse</h1>
         <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
       </div>
      <div class="flex gap-2">
-        <RouterLink to="/home"
+        <RouterLink to="/"
           class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
           <House :size="18" />
           Home
@@ -94,6 +95,9 @@ const toggleEditMode = () => {
           Gestione Categorie
         </RouterLink>
       </div>
+    </header> -->
+    <header>
+      <Header />
     </header>
 
     <button

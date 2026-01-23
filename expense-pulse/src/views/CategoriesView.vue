@@ -7,6 +7,7 @@ import { GridLayout, GridItem } from "vue3-grid-layout-next";
 // Import dei componenti atomici
 import CategoryTable from "@/components/CategoryTable.vue";
 import CategoryForm from "@/components/CategoryForm.vue";
+import Header from "@/components/Header.vue";
 
 // VARIABILI
 const categoryStore = useCategoryStore();
@@ -79,9 +80,8 @@ const handleUpdate = async () => {
 
 <template>
   <main class="max-w-5xl mx-auto p-6">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Gestione Categorie</h1>
-      <p class="text-gray-500">Configura i tuoi limiti di spesa e lo stile visivo</p>
+    <header>
+      <Header />
     </header>
 
     <GridLayout
