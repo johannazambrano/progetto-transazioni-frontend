@@ -1,27 +1,45 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import type { Category } from "@/models/entities/Category";
 import { useCategoryStore } from "@/stores/categoryStore";
-import { Pencil, Trash2, Plus, X, Wallet } from "lucide-vue-next";
-import { onMounted } from "vue";
+import { GridLayout, GridItem } from "vue3-grid-layout-next";
 
+// Import dei componenti atomici
+import CategoryTable from "@/components/CategoryTable.vue";
+import CategoryForm from "@/components/CategoryForm.vue";
+
+// VARIABILI
 const categoryStore = useCategoryStore();
-
-// stato per il modale di modifica
+const selectedCategory = ref<Category | null>(null);
 const isEditModalOpen = ref(false);
 const editingCategory = ref<Category | null>(null);
+const isSaving = ref(false);
+
+
+const layout = ref([
+  { i: "form", x: 0, y: 0, w: 12, h: 6 },
+  { i: "table", x: 0, y: 6, w: 12, h: 10 },
+]);
 
 onMounted(() => {
   categoryStore.fetchCategories();
 });
 
-const openEditModal = (cat: Category) => {
+const handleEdit = (cat: Category) => {
+  selectedCategory.value = { ...cat };
+  // Opzionale: scroll al form o focus
+};
+
+const handleSuccess = () => {
+  selectedCategory.value = null;
+};
+
+ const openEditModal = (cat: Category) => {
   // Cloniamo l'oggetto per non modificare lo store prima del save
   editingCategory.value = { ...cat };
   isEditModalOpen.value = true;
 };
 
-const isSaving = ref(false);
 
 const handleUpdate = async () => {
   if (
@@ -55,30 +73,41 @@ const handleUpdate = async () => {
     // 5. Resetto lo stato di salvataggio
     isSaving.value = false;
   }
-};
+}; 
 
-const confirmDelete = async (cat: Category) => {
-  if (
-    confirm(`Sei sicuro di voler eliminare la categoria "${cat.descrizione}"?`)
-  ) {
-    try {
-      await categoryStore.deleteCategory(cat.id);
-    } catch (error: any) {
-      alert(error.message || "Errore durante l'eliminazione");
-    }
-  }
-};
-
-// Formattazione Euro
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
 </script>
 
 <template>
+  <main class="max-w-5xl mx-auto p-6">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Gestione Categorie</h1>
+      <p class="text-gray-500">Configura i tuoi limiti di spesa e lo stile visivo</p>
+    </header>
+
+    <GridLayout
+      v-model:layout="layout"
+      :col-num="12"
+      :row-height="30"
+      :is-draggable="true"
+      :is-resizable="true"
+      class="bg-gray-50 p-4 rounded-xl"
+    >
+      <GridItem v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i">
+        
+        <template v-if="item.i === 'table'">
+          <CategoryTable @edit="handleEdit" />
+        </template>
+        
+        <template v-if="item.i === 'form'">
+          <CategoryForm :editData="selectedCategory" @success="handleSuccess" />
+        </template>
+
+      </GridItem>
+    </GridLayout>
+  </main>
+</template>
+
+<!-- <template>
   <main class="max-w-5xl mx-auto p-6">
     <header class="mb-8 flex justify-between items-center">
       <div>
@@ -151,4 +180,4 @@ const formatCurrency = (value: number) => {
       </div>
     </div>
   </main>
-</template>
+</template> -->

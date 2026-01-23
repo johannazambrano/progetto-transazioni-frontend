@@ -27,10 +27,8 @@ export const useCategoryStore = defineStore("category", () => {
   const fetchCategories = async () => {
     loading.value = true;
     try {
-      console.log("Entriamo in fetchCategories");
       const response = await api.get<CategoryResponseDTO>("/categories");
       categories.value = response.data.categories.map(CategoryMapper.toEntity);
-      console.log("Riceve la risposta del fetchCategory");
     } catch (error) {
       console.error("Errore nel caricamento categorie:", error);
     } finally {
