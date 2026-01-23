@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { House, Layers } from "lucide-vue-next";
+import { House, Layers, ShoppingBag } from "lucide-vue-next";
 </script>
 
 <template>
   <div class="mb-8 flex justify-between items-center">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">ExpensePulse</h1>
+        <div class="flex items-center gap-2">
+          <ShoppingBag :size="24" />
+          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">ExpensePulse</h1>
+        </div>
         <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
       </div>
      <div class="flex gap-2">

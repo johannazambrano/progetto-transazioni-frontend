@@ -3,7 +3,7 @@ import { ref, onMounted, type Component } from "vue";
 import { RouterLink } from "vue-router";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
-import { House, Layers } from "lucide-vue-next";
+import { Pencil, Lock, Edit3 } from "lucide-vue-next";
 import BalanceCards from "@/components/BalanceCards.vue";
 import ExpenseChart from "@/components/ExpenseChart.vue";
 import TimeChart from "@/components/TimeChart.vue";
@@ -78,41 +78,22 @@ const toggleEditMode = () => {
 
 <template>
   <main class="max-w-5xl mx-auto p-6">
-    <!-- <header class="mb-10 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">ExpensePulse</h1>
-        <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
-      </div>
-     <div class="flex gap-2">
-        <RouterLink to="/"
-          class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
-          <House :size="18" />
-          Home
-        </RouterLink>
-        <RouterLink to="/categories"
-          class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all">
-          <Layers :size="18" />
-          Gestione Categorie
-        </RouterLink>
-      </div>
-    </header> -->
     <header>
       <Header />
     </header>
 
-    <button
-      @click="toggleEditMode"
-      :class="[
+    <div class="flex justify-end mr-3">
+      <button @click="toggleEditMode" :class="[
         'flex items-center px-2 py-2 rounded-xl text-sm font-medium transition-all',
-        !editMode 
-          ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700' 
+        !editMode
+          ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700'
           : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-200 hover:text-indigo-600 hover:shadow-sm'
-      ]"
-    >
-      <Edit3 v-if="!editMode" :size="18" />
-      <Lock v-else :size="18" />
-      <span>{{ editMode ? 'Modifica Layout' : 'Blocca Layout' }}</span>
-    </button>
+      ]">
+        <Lock v-if="!editMode" :size="18" class="mr-2" />
+        <Edit3 v-else :size="18" class="mr-2" />
+        <span>{{ editMode ? 'Modifica Layout' : 'Blocca Layout' }}</span>
+      </button>
+    </div>
     <grid-layout
       v-model:layout="layout"
       :col-num="12"
@@ -136,7 +117,7 @@ const toggleEditMode = () => {
         :min-h="item.minH"
         :max-h="item.maxH"
         :static="item.static"
-        :class="editMode ? '' : 'rounded-lg shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
+        :class="editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
       >
         <component
           :is="getComponent(item.i)"
