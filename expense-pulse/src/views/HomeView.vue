@@ -136,7 +136,7 @@ const toggleEditMode = () => {
         :min-h="item.minH"
         :max-h="item.maxH"
         :static="item.static"
-        :class="editMode ? '' : 'rounded-lg shadow-sm border border-gray-200 overflow-hidden fit-content'"
+        :class="editMode ? '' : 'rounded-lg shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
       >
         <component
           :is="getComponent(item.i)"
@@ -148,4 +148,16 @@ const toggleEditMode = () => {
   </main>
 </template>
 <style scoped>
+/* Placeholder durante il drag */
+:deep(.vue-grid-item.vue-grid-placeholder) {
+  background: #e0e7ff;
+  opacity: 0.3;
+  border-radius: 8px;
+  border: 2px dashed #6366f1;
+}
+
+:deep(.vue-grid-item.resizing) {
+  opacity: 0.9;
+  z-index: 3;
+}
 </style>
