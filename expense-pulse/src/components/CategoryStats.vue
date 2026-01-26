@@ -35,7 +35,7 @@ const formatCurrency = (value: number) => {
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-32 p-2">
     <!-- Totale Categorie -->
     <div
-      class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
+      class="bg-linear-to-br from-indigo-500 to-indigo-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
     >
       <div class="flex items-center justify-between mb-1">
         <span class="text-indigo-100 text-xs font-bold uppercase">
@@ -48,7 +48,7 @@ const formatCurrency = (value: number) => {
 
     <!-- Budget Totale -->
     <div
-      class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
+      class="bg-linear-to-br from-emerald-500 to-emerald-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
     >
       <div class="flex items-center justify-between mb-1">
         <span class="text-emerald-100 text-xs font-bold uppercase">
@@ -61,7 +61,7 @@ const formatCurrency = (value: number) => {
 
     <!-- Budget Medio -->
     <div
-      class="bg-gradient-to-br from-amber-500 to-amber-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
+      class="bg-linear-to-br from-amber-500 to-amber-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
     >
       <div class="flex items-center justify-between mb-1">
         <span class="text-amber-100 text-xs font-bold uppercase">

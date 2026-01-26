@@ -133,13 +133,7 @@ watch(
           <label class="block text-xs font-bold text-gray-400 uppercase"
             >Colore</label
           >
-          <!-- <button
-            @click="formData.colore = generateRandomColor()"
-            type="button"
-            class="text-[10px] text-indigo-600 hover:underline flex items-center gap-1"
-          >
-            <RotateCcw :size="14" stroke-width="3" />
-          </button> -->
+
           <button @click="formData.colore = generateRandomColor()" type="button"
               class="text-[10px] text-indigo-600 hover:underline flex items-center gap-1 font-bold mt-0.5 transition-colors">
               <RotateCcw :size="10" stroke-width="3" />
@@ -147,7 +141,7 @@ watch(
             </button>
         </div>
         <div
-          class="flex items-center gap-2 p-1.5 bg-gray-50 border border-gray-200 rounded-xl h-[46px]"
+          class="flex items-center gap-2 p-1.5 bg-gray-50 border border-gray-200 rounded-xl h-11.5"
         >
           <input
             v-model="formData.colore"

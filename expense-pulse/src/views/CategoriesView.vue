@@ -15,10 +15,6 @@ import { Lock, Edit3 } from "lucide-vue-next";
 
 // VARIABILI
 const categoryStore = useCategoryStore();
-const selectedCategory = ref<Category | null>(null);
-const isEditModalOpen = ref(false);
-const editingCategory = ref<Category | null>(null);
-const isSaving = ref(false);
 const GridContainer = _GridContainer as any;
 
 // Mappa dei componenti - chiave: ID componente
@@ -80,11 +76,6 @@ const getComponent = (itemId: string): Component | undefined => {
 onMounted(() => {
   categoryStore.fetchCategories();
 });
-
-// Toggle modalità modifica
-const toggleEditMode = () => {
-  editMode.value = !editMode.value;
-};
 </script>
 
 <template>
