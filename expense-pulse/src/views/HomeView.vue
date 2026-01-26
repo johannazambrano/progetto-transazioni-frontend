@@ -12,7 +12,7 @@ import TransactionHistory from "@/components/TransactionHistory.vue";
 import { GridLayout, GridItem } from "vue3-grid-layout-next";
 import Header from "@/components/Header.vue";
 import type { LayoutItem } from "@/models/entities/LayoutItem";
-import { DEFAULT_LAYOUT, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -69,16 +69,16 @@ const loadLayout = (): LayoutItem[] => {
       const parsed = JSON.parse(savedLayout) as LayoutItem[];
       
       // Validazione: assicurati che tutti gli elementi richiesti esistano
-      const requiredIds = DEFAULT_LAYOUT.map(item => item.i);
+      const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
       const savedIds = parsed.map(item => item.i);
       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
       
-      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT.length) {
+      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
         console.log("✅ Layout caricato da localStorage");
         return parsed;
       } else {
         console.warn("⚠️ Layout salvato incompleto, uso quello di default");
-        return [...DEFAULT_LAYOUT];
+        return [...DEFAULT_LAYOUT_HOME];
       }
     }
   } catch (error) {
@@ -86,7 +86,7 @@ const loadLayout = (): LayoutItem[] => {
   }
   
   console.log("📋 Uso layout di default");
-  return [...DEFAULT_LAYOUT];
+  return [...DEFAULT_LAYOUT_HOME];
 };
 
 /**
@@ -106,7 +106,7 @@ const saveLayout = (layoutToSave: LayoutItem[]) => {
  */
 const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    layout.value = [...DEFAULT_LAYOUT];
+    layout.value = [...DEFAULT_LAYOUT_HOME];
     // saveLayout(layout.value);
     console.log("🔄 Layout resettato");
   }
@@ -141,7 +141,7 @@ const toggleEditMode = () => {
     </header>
 
     <div class="flex justify-end mr-3">
-     <button v-if="editMode" @click="resetLayout"
+      <button v-if="editMode" @click="resetLayout"
         class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all bg-red-400 border border-gray-200 text-white hover:border-red-400 hover:bg-red-600 hover:shadow-sm"
         title="Ripristina layout predefinito">
         <RotateCcw :size="18" class="mr-2" />
