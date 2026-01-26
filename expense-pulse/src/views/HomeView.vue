@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, type Component } from "vue";
-import { RouterLink } from "vue-router";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
-import { Pencil, Lock, Edit3 } from "lucide-vue-next";
+import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
 import BalanceCards from "@/components/BalanceCards.vue";
 import ExpenseChart from "@/components/ExpenseChart.vue";
 import TimeChart from "@/components/TimeChart.vue";
@@ -12,23 +11,12 @@ import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
 import { GridLayout, GridItem } from "vue3-grid-layout-next";
 import Header from "@/components/Header.vue";
+import type { LayoutItem } from "@/models/entities/LayoutItem";
+import { DEFAULT_LAYOUT, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 
 // --- STORE ---
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
-
-interface LayoutItem {
-  i: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  minW?: number;
-  maxW?: number;
-  minH?: number;
-  maxH?: number;
-  static?: boolean;
-}
 
 // --- VARIABILI ---
 // Mappa dei componenti - chiave: ID componente
@@ -41,19 +29,9 @@ const componentMap: Record<string, Component> = {
   transactionHistory: TransactionHistory,
 };
 
-// Layout senza riferimenti ai componenti
-const layout = ref<LayoutItem[]>([
-  {i: "balance",x: 0,y: 0,w: 12,h: 3,minW: 8,maxW: 12,minH: 3,maxH: 3,static: false},
-  {i: "expenseChart",x: 0,y: 4,w: 6,h: 9,minW: 4,maxW: 12,minH: 6,maxH: 12,static: false},
-  {i: "timeChart",x: 6,y: 4,w: 6,h: 9,minW: 5,maxW: 12,minH: 9,maxH: 12,static: false},
-  {i: "transactionForm",x: 0,y: 12,w: 12,h: 5,minW: 8,maxW: 12,minH: 5,maxH: 5,static: false},
-  {i: "researchTable",x: 0,y: 18,w: 12,h: 4,minW: 8,maxW: 12,minH: 3,maxH: 8,static: false},
-  {i: "transactionHistory",x: 0,y: 22,w: 12,h: 8,minW: 6,maxW: 12,minH: 4,maxH: 15,static: false},
-]);
 
-const draggable = ref(true);
-const resizable = ref(true);
-const editMode = ref(true); // Stato per la modalità di modifica del layout
+const editMode = ref(false); // Stato per la modalità di modifica del layout
+const layout = ref<LayoutItem[]>([]);
 
 
 // --- FUNZIONI
@@ -63,15 +41,95 @@ const getComponent = (itemId: string): Component | undefined => {
 };
 
 onMounted(async () => {
+  // Carica il layout salvato
+  layout.value = loadLayout();
+  
+  // Carica i dati degli store
   store.fetchTransactions();
   await categoryStore.fetchCategories();
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 // Optional smooth scroll to top when component mounts
 window.scrollTo({ top: 0, behavior: "smooth" });
 
-// Toggle modalità modifica
+// --- FUNZIONI DI PERSISTENZA ---
+
+/**
+ * Carica il layout salvato da localStorage
+ * Se non esiste, restituisce il layout di default
+ */
+const loadLayout = (): LayoutItem[] => {
+  try {
+    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    
+    if (savedLayout) {
+      const parsed = JSON.parse(savedLayout) as LayoutItem[];
+      
+      // Validazione: assicurati che tutti gli elementi richiesti esistano
+      const requiredIds = DEFAULT_LAYOUT.map(item => item.i);
+      const savedIds = parsed.map(item => item.i);
+      const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
+      
+      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT.length) {
+        console.log("✅ Layout caricato da localStorage");
+        return parsed;
+      } else {
+        console.warn("⚠️ Layout salvato incompleto, uso quello di default");
+        return [...DEFAULT_LAYOUT];
+      }
+    }
+  } catch (error) {
+    console.error("❌ Errore nel caricamento del layout:", error);
+  }
+  
+  console.log("📋 Uso layout di default");
+  return [...DEFAULT_LAYOUT];
+};
+
+/**
+ * Salva il layout corrente in localStorage
+ */
+const saveLayout = (layoutToSave: LayoutItem[]) => {
+  try {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
+    console.log("💾 Layout salvato");
+  } catch (error) {
+    console.error("❌ Errore nel salvataggio del layout:", error);
+  }
+};
+
+/**
+ * Resetta il layout al default
+ */
+const resetLayout = () => {
+  if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
+    layout.value = [...DEFAULT_LAYOUT];
+    // saveLayout(layout.value);
+    console.log("🔄 Layout resettato");
+  }
+};
+
+/**
+ * Handler per l'evento di aggiornamento del layout
+ * Viene chiamato quando l'utente trascina o ridimensiona un elemento
+ */
+const handleLayoutUpdated = (newLayout: LayoutItem[]) => {
+  // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
+  if (!editMode.value) {
+    saveLayout(newLayout);
+  }
+};
+
 const toggleEditMode = () => {
+  // Se stiamo uscendo dalla modalità edit, salva il layout
+  if (!editMode.value) {
+    saveLayout(layout.value);
+    console.log("🔒 Layout bloccato e salvato");
+  }
+  
   editMode.value = !editMode.value;
 };
 </script>
@@ -83,23 +141,29 @@ const toggleEditMode = () => {
     </header>
 
     <div class="flex justify-end mr-3">
+     <button v-if="editMode" @click="resetLayout"
+        class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all bg-red-400 border border-gray-200 text-white hover:border-red-400 hover:bg-red-600 hover:shadow-sm"
+        title="Ripristina layout predefinito">
+        <RotateCcw :size="18" class="mr-2" />
+        <span>Reset</span>
+      </button>
       <button @click="toggleEditMode" :class="[
         'flex items-center px-2 py-2 rounded-xl text-sm font-medium transition-all',
         !editMode
           ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700'
-          : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-200 hover:text-indigo-600 hover:shadow-sm'
+          : 'bg-green-400 border border-gray-200 text-white hover:bg-green-600 hover:shadow-sm'
       ]">
-        <Lock v-if="!editMode" :size="18" class="mr-2" />
+        <Lock v-if="editMode" :size="18" class="mr-2" />
         <Edit3 v-else :size="18" class="mr-2" />
-        <span>{{ editMode ? 'Modifica Layout' : 'Blocca Layout' }}</span>
+        <span>{{ editMode ? 'Blocca Layout' : 'Modifica Layout' }}</span>
       </button>
     </div>
     <grid-layout
       v-model:layout="layout"
       :col-num="12"
       :row-height="30"
-      :is-draggable="!editMode"
-      :is-resizable="!editMode"
+      :is-draggable="editMode"
+      :is-resizable="editMode"
       :vertical-compact="true"
       :margin="[10, 10]"
       :use-css-transforms="true"
@@ -117,7 +181,7 @@ const toggleEditMode = () => {
         :min-h="item.minH"
         :max-h="item.maxH"
         :static="item.static"
-        :class="editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
+        :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
       >
         <component
           :is="getComponent(item.i)"
