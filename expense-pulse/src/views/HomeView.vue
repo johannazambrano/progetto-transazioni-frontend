@@ -13,6 +13,7 @@ import { GridLayout, GridItem } from "vue3-grid-layout-next";
 import Header from "@/components/Header.vue";
 import type { LayoutItem } from "@/models/entities/LayoutItem";
 import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import _GridContainer from "@/components/GridContainer.vue";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -28,7 +29,7 @@ const componentMap: Record<string, Component> = {
   researchTable: ResearchTable,
   transactionHistory: TransactionHistory,
 };
-
+const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
 const layout = ref<LayoutItem[]>([]);
@@ -158,7 +159,16 @@ const toggleEditMode = () => {
         <span>{{ editMode ? 'Blocca Layout' : 'Modifica Layout' }}</span>
       </button>
     </div>
-    <grid-layout
+   <GridContainer 
+    v-model:layout="layout" 
+    :is-editable="editMode"
+    >
+      <template #default="{ item }: any">
+        <component v-if="item && item.i" :is="getComponent(item.i)"
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
+      </template>
+    </GridContainer>
+    <!-- <grid-layout
       v-model:layout="layout"
       :col-num="12"
       :row-height="30"
@@ -188,7 +198,7 @@ const toggleEditMode = () => {
           class="w-full h-full p-4"
         />
       </grid-item>
-    </grid-layout>
+    </grid-layout> -->
 
   </main>
 </template>

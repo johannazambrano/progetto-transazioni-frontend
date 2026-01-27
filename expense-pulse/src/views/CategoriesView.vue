@@ -137,9 +137,7 @@ const resetLayout = () => {
     </div>
     <GridContainer 
       v-model:layout="layout" 
-      :is-editable="editMode" 
-      :use-css-transforms="true"
-      :vertical-compact="true"
+      :is-editable="editMode"
       >
       <template #default="{ item }: any">
         <component

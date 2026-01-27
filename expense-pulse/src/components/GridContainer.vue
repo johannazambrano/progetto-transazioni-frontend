@@ -35,10 +35,9 @@ const internalLayout = computed({
       :key="item.i"
       v-bind="item" 
       :static="item.static"
-      :class="!isEditable ? 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden' : ''"
+      :class="isEditable ? 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden' : ''"
     >
       <slot :item="item"></slot>
     </grid-item>
   </grid-layout>
 </template>
-
