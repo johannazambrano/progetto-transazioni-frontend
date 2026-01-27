@@ -1,6 +1,6 @@
 import type { PaginazioneDTO } from '../dtos/PaginazioneDTO';
 import type { TransactionDTO, TransactionResponseDTO } from '../dtos/TransactionDTO';
-import type { Pagination, Transaction } from '../entities/Transaction';
+import type { Pagination, Transaction } from '../vo/Transaction';
 import { CategoryMapper } from './CategoryMapper';
 
 export class TransactionMapper {

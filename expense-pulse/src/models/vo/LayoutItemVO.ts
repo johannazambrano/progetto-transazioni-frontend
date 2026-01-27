@@ -1,4 +1,4 @@
-export interface LayoutItem {
+export interface LayoutItemVO {
   i: string;
   x: number;
   y: number;

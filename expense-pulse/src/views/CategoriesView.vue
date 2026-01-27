@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, type Component } from "vue";
-import type { LayoutItem } from "@/models/entities/LayoutItem";
+import type { LayoutItem } from "@/models/vo/LayoutItemVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 
 // Import dei componenti atomici
@@ -50,15 +50,15 @@ onMounted(() => {
 const loadLayout = (): LayoutItem[] => {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    
+
     if (savedLayout) {
       const parsed = JSON.parse(savedLayout) as LayoutItem[];
-      
+
       // Validazione: assicurati che tutti gli elementi richiesti esistano
       const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
       const savedIds = parsed.map(item => item.i);
       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
-      
+
       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
         console.log("✅ Layout caricato da localStorage");
         return parsed;
@@ -70,7 +70,7 @@ const loadLayout = (): LayoutItem[] => {
   } catch (error) {
     console.error("❌ Errore nel caricamento del layout:", error);
   }
-  
+
   console.log("📋 Uso layout di default");
   return [...DEFAULT_LAYOUT_CATEGORIES];
 };
@@ -94,7 +94,7 @@ const toggleEditMode = () => {
     saveLayout(layout.value);
     console.log("🔒 Layout bloccato e salvato");
   }
-  
+
   editMode.value = !editMode.value;
 };
 
@@ -112,7 +112,9 @@ const resetLayout = () => {
 
 <template>
   <main class="max-w-5xl mx-auto p-6">
-    <header><Header /></header>
+    <header>
+      <Header />
+    </header>
 
     <div class="flex justify-end mr-3 mb-4">
       <button v-if="editMode" @click="resetLayout"
@@ -121,30 +123,21 @@ const resetLayout = () => {
         <RotateCcw :size="18" class="mr-2" />
         <span>Reset</span>
       </button>
-      <button
-        @click="toggleEditMode"
-        :class="[
-          'flex items-center px-2 py-2 rounded-xl text-sm font-medium transition-all',
-          !editMode
-            ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700'
-            : 'bg-green-400 border border-gray-200 text-white hover:border-green-600 hover:bg-green-600 hover:text-white hover:shadow-sm',
-        ]"
-      >
+      <button @click="toggleEditMode" :class="[
+        'flex items-center px-2 py-2 rounded-xl text-sm font-medium transition-all',
+        !editMode
+          ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700'
+          : 'bg-green-400 border border-gray-200 text-white hover:border-green-600 hover:bg-green-600 hover:text-white hover:shadow-sm',
+      ]">
         <Lock v-if="editMode" :size="18" class="mr-2" />
         <Edit3 v-else :size="18" class="mr-2" />
         <span>{{ editMode ? "Blocca Layout" : "Modifica Layout" }}</span>
       </button>
     </div>
-    <GridContainer 
-      v-model:layout="layout" 
-      :is-editable="editMode"
-      >
+    <GridContainer v-model:layout="layout" :is-editable="editMode">
       <template #default="{ item }: any">
-        <component
-          v-if="item && item.i"
-          :is="getComponent(item.i)"
-          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
-        />
+        <component v-if="item && item.i" :is="getComponent(item.i)"
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
       </template>
     </GridContainer>
   </main>

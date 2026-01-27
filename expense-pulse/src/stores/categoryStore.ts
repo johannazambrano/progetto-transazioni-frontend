@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { CategoryMapper } from "@/models/mappers/CategoryMapper";
 import type { CategoryResponseDTO } from "@/models/dtos/CategoryDTO";
-import type { Category } from "@/models/entities/Category";
+import type { Category } from "@/models/vo/Category";
 
 export const useCategoryStore = defineStore("category", () => {
   console.log("Entriamo dentro useCategoryStore");

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
-import type { Transaction, Pagination } from "@/models/entities/Transaction";
+import type { Transaction, Pagination } from "@/models/vo/Transaction";
 import type { TransactionDTO } from "@/models/dtos/TransactionDTO";
 import { useCategoryStore } from "./categoryStore";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";

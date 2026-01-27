@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { Pencil, Plus, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
-import type { Transaction } from "../models/entities/Transaction";
+import type { Transaction } from "../models/vo/Transaction";
 
 // --- VARIABILI ---
 const isShakingForm = ref(false);
@@ -12,7 +12,7 @@ const editingId = ref<string | null>(null);
 const showErrors = ref(false);
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
-const isCategoryModalOpen = ref(false); 
+const isCategoryModalOpen = ref(false);
 const newCat = ref({
   descrizione: "",
   codice: "",
@@ -112,7 +112,7 @@ const handleSave = async () => {
       title: newTransaction.value.title,
       amount: newTransaction.value.amount,
       date: newTransaction.value.date!,
-      category: selectedCategoryObj, 
+      category: selectedCategoryObj,
     };
 
     // 2. Logica Unica: o Modifica o Aggiunta
@@ -188,15 +188,15 @@ watch(() => props.editData, (newData) => {
       title: newData.title,
       amount: newData.amount,
       // Estraiamo solo la descrizione o l'id perché il form usa una stringa
-      category: typeof newData.category === 'object' 
-                ? newData.category.descrizione 
-                : newData.category,
+      category: typeof newData.category === 'object'
+        ? newData.category.descrizione
+        : newData.category,
       date: newData.date
     };
     // Settiamo gli stati di editing
     editingId.value = newData.id; // Salviamo l'ID per sapere cosa aggiornare dopo
     isEditing.value = true;
-  }else {
+  } else {
     cancelEdit(); // Se editData diventa null, puliamo il form
   }
 }, { deep: true });

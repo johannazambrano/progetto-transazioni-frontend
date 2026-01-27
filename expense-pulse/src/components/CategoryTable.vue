@@ -5,7 +5,7 @@
  * Integrato con Pinia Store e Lucide Icons.
  */
 
-import type { Category } from "@/models/entities/Category";
+import type { Category } from "@/models/vo/Category";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { Pencil, Trash2 } from "lucide-vue-next";
 

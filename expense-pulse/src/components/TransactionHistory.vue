@@ -7,7 +7,7 @@
 import { Calendar, Trash2, Pencil, ArrowUpCircle, ArrowDownCircle, X } from "lucide-vue-next";
 import { useExpenseStore } from "@/stores/expenseStore";
 import AppPagination from "@/components/AppPagination.vue";
-import type { Transaction } from "@/models/entities/Transaction";
+import type { Transaction } from "@/models/vo/Transaction";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
 

@@ -1,5 +1,5 @@
 import type { CategoryDTO } from '../dtos/CategoryDTO';
-import type { Category } from '../entities/Category';
+import type { Category } from '../vo/Category';
 
 export class CategoryMapper {
     static toEntity(dto: CategoryDTO): Category {

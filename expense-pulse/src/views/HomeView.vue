@@ -11,7 +11,7 @@ import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
 import { GridLayout, GridItem } from "vue3-grid-layout-next";
 import Header from "@/components/Header.vue";
-import type { LayoutItem } from "@/models/entities/LayoutItem";
+import type { LayoutItem } from "@/models/vo/LayoutItemVO";
 import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 import _GridContainer from "@/components/GridContainer.vue";
 
@@ -44,11 +44,11 @@ const getComponent = (itemId: string): Component | undefined => {
 onMounted(async () => {
   // Carica il layout salvato
   layout.value = loadLayout();
-  
+
   // Carica i dati degli store
   store.fetchTransactions();
   await categoryStore.fetchCategories();
-  
+
   // Scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
@@ -65,15 +65,15 @@ window.scrollTo({ top: 0, behavior: "smooth" });
 const loadLayout = (): LayoutItem[] => {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    
+
     if (savedLayout) {
       const parsed = JSON.parse(savedLayout) as LayoutItem[];
-      
+
       // Validazione: assicurati che tutti gli elementi richiesti esistano
       const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
       const savedIds = parsed.map(item => item.i);
       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
-      
+
       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
         console.log("✅ Layout caricato da localStorage");
         return parsed;
@@ -85,7 +85,7 @@ const loadLayout = (): LayoutItem[] => {
   } catch (error) {
     console.error("❌ Errore nel caricamento del layout:", error);
   }
-  
+
   console.log("📋 Uso layout di default");
   return [...DEFAULT_LAYOUT_HOME];
 };
@@ -130,7 +130,7 @@ const toggleEditMode = () => {
     saveLayout(layout.value);
     console.log("🔒 Layout bloccato e salvato");
   }
-  
+
   editMode.value = !editMode.value;
 };
 </script>
@@ -159,10 +159,7 @@ const toggleEditMode = () => {
         <span>{{ editMode ? 'Blocca Layout' : 'Modifica Layout' }}</span>
       </button>
     </div>
-   <GridContainer 
-    v-model:layout="layout" 
-    :is-editable="editMode"
-    >
+    <GridContainer v-model:layout="layout" :is-editable="editMode">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
