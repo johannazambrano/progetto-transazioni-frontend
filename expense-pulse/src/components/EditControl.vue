@@ -6,7 +6,7 @@
 import { ref } from "vue";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
 import type { LayoutItem } from "@/models/entities/LayoutItem";
-import { DEFAULT_LAYOUT, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 
 
  // VARIABILI
@@ -19,7 +19,7 @@ const layout = ref<LayoutItem[]>([]);
  */
 const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    layout.value = [...DEFAULT_LAYOUT];
+    layout.value = [...DEFAULT_LAYOUT_HOME];
     // saveLayout(layout.value);
     console.log("🔄 Layout resettato");
   }
