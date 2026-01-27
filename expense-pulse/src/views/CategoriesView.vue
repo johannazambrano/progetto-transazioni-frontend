@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, type Component } from "vue";
-import type { LayoutItem } from "@/models/vo/LayoutItemVO";
+import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 
 // Import dei componenti atomici
@@ -24,7 +24,7 @@ const componentMap: Record<string, Component> = {
   stats: CategoryStats,
 };
 
-const layout = ref<LayoutItem[]>([]);
+const layout = ref<LayoutItemVO[]>([]);
 
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
@@ -47,12 +47,12 @@ onMounted(() => {
  * Carica il layout salvato da localStorage
  * Se non esiste, restituisce il layout di default
  */
-const loadLayout = (): LayoutItem[] => {
+const loadLayout = (): LayoutItemVO[] => {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
 
     if (savedLayout) {
-      const parsed = JSON.parse(savedLayout) as LayoutItem[];
+      const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
 
       // Validazione: assicurati che tutti gli elementi richiesti esistano
       const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
@@ -78,7 +78,7 @@ const loadLayout = (): LayoutItem[] => {
 /**
  * Salva il layout corrente in localStorage
  */
-const saveLayout = (layoutToSave: LayoutItem[]) => {
+const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
     console.log("💾 Layout salvato");

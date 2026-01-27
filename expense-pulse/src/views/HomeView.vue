@@ -9,9 +9,8 @@ import TimeChart from "@/components/TimeChart.vue";
 import TransactionForm from "@/components/TransactionForm.vue";
 import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
-import { GridLayout, GridItem } from "vue3-grid-layout-next";
 import Header from "@/components/Header.vue";
-import type { LayoutItem } from "@/models/vo/LayoutItemVO";
+import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 import _GridContainer from "@/components/GridContainer.vue";
 
@@ -32,7 +31,7 @@ const componentMap: Record<string, Component> = {
 const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
-const layout = ref<LayoutItem[]>([]);
+const layout = ref<LayoutItemVO[]>([]);
 
 
 // --- FUNZIONI
@@ -62,12 +61,12 @@ window.scrollTo({ top: 0, behavior: "smooth" });
  * Carica il layout salvato da localStorage
  * Se non esiste, restituisce il layout di default
  */
-const loadLayout = (): LayoutItem[] => {
+const loadLayout = (): LayoutItemVO[] => {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
 
     if (savedLayout) {
-      const parsed = JSON.parse(savedLayout) as LayoutItem[];
+      const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
 
       // Validazione: assicurati che tutti gli elementi richiesti esistano
       const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
@@ -93,7 +92,7 @@ const loadLayout = (): LayoutItem[] => {
 /**
  * Salva il layout corrente in localStorage
  */
-const saveLayout = (layoutToSave: LayoutItem[]) => {
+const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
     console.log("💾 Layout salvato");
@@ -117,7 +116,7 @@ const resetLayout = () => {
  * Handler per l'evento di aggiornamento del layout
  * Viene chiamato quando l'utente trascina o ridimensiona un elemento
  */
-const handleLayoutUpdated = (newLayout: LayoutItem[]) => {
+const handleLayoutUpdated = (newLayout: LayoutItemVO[]) => {
   // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
   if (!editMode.value) {
     saveLayout(newLayout);
@@ -165,38 +164,6 @@ const toggleEditMode = () => {
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
       </template>
     </GridContainer>
-    <!-- <grid-layout
-      v-model:layout="layout"
-      :col-num="12"
-      :row-height="30"
-      :is-draggable="editMode"
-      :is-resizable="editMode"
-      :vertical-compact="true"
-      :margin="[10, 10]"
-      :use-css-transforms="true"
-    >
-      <grid-item
-        v-for="item in layout"
-        :key="item.i"
-        :x="item.x"
-        :y="item.y"
-        :w="item.w"
-        :h="item.h"
-        :i="item.i"
-        :min-w="item.minW"
-        :max-w="item.maxW"
-        :min-h="item.minH"
-        :max-h="item.maxH"
-        :static="item.static"
-        :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'"
-      >
-        <component
-          :is="getComponent(item.i)"
-          class="w-full h-full p-4"
-        />
-      </grid-item>
-    </grid-layout> -->
-
   </main>
 </template>
 <style scoped>
