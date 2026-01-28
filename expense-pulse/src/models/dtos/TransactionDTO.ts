@@ -9,18 +9,3 @@ export interface TransactionDTO {
     startDate: string;
     endDate: string;
 }
-
-// DTO per l'invio della ricerca (POST /ricerca)
-export interface FiltroRicercaTransactionDTO {
-    title?: string;
-    category?: string;
-    startDate?: string; 
-    endDate?: string;
-    paginazione: Partial<PaginazioneDTO>; 
-}
-
-// DTO per la ricezione dei dati
-export interface TransactionResponseDTO {
-    transactions: TransactionDTO[];
-    paginazione: PaginazioneDTO;
-}

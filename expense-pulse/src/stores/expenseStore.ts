@@ -3,10 +3,8 @@ import { ref, computed } from "vue";
 import api from "@/services/api";
 import type { Transaction, Pagination } from "@/models/vo/Transaction";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";
-import type {
-  TransactionResponseDTO,
-  FiltroRicercaTransactionDTO,
-} from "@/models/dtos/TransactionDTO";
+import type { TransactionResponseDTO } from "@/models/dtos/TransactionResponseDTO";
+import type { FiltroRicercaTransactionDTO } from "@/models/dtos/FiltroRicercaTransactionDTO";
 
 export const useExpenseStore = defineStore("expense", () => {
   // STATO
