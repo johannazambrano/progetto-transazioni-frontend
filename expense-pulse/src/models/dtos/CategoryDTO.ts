@@ -5,7 +5,3 @@ export interface CategoryDTO {
     budget?: number;
     colore?: string;
 }
-
-export interface CategoryResponseDTO {
-    categories: CategoryDTO[];
-}

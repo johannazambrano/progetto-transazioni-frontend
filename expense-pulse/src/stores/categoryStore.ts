@@ -2,7 +2,7 @@ import api from "@/services/api";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { CategoryMapper } from "@/models/mappers/CategoryMapper";
-import type { CategoryResponseDTO } from "@/models/dtos/CategoryDTO";
+import type { CategoryResponseDTO } from "@/models/dtos/CategoryResponseDTO";
 import type { Category } from "@/models/vo/Category";
 
 export const useCategoryStore = defineStore("category", () => {

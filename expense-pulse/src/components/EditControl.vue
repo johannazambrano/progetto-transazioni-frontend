@@ -5,13 +5,14 @@
 */
 import { ref } from "vue";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
-import type { LayoutItem } from "@/models/vo/LayoutItemVO";
+import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import type { LayoutItem } from "chart.js";
 
 
 // VARIABILI
 const editMode = ref(false);
-const layout = ref<LayoutItem[]>([]);
+const layout = ref<LayoutItemVO[]>([]);
 
 // FUNZIONI
 /**
@@ -38,7 +39,7 @@ const toggleEditMode = () => {
 /**
  * Salva il layout corrente in localStorage
  */
-const saveLayout = (layoutToSave: LayoutItem[]) => {
+const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
     console.log("💾 Layout salvato");

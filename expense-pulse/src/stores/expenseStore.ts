@@ -2,15 +2,11 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
 import type { Transaction, Pagination } from "@/models/vo/Transaction";
-import type { TransactionDTO } from "@/models/dtos/TransactionDTO";
-import { useCategoryStore } from "./categoryStore";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";
 import type {
   TransactionResponseDTO,
   FiltroRicercaTransactionDTO,
 } from "@/models/dtos/TransactionDTO";
-import type { FiltroTransactionDTO } from "@/models/dtos/FiltroTransactionDTO";
-import type { PaginazioneDTO } from "@/models/dtos/PaginazioneDTO";
 
 export const useExpenseStore = defineStore("expense", () => {
   // STATO
