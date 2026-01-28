@@ -1,5 +1,4 @@
 import type { CategoryDTO } from "./CategoryDTO";
-import type { PaginazioneDTO } from "./PaginazioneDTO";
 
 export interface TransactionDTO {
     id?: string;

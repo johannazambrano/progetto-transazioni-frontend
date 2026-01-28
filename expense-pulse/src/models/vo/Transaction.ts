@@ -1,16 +1,9 @@
-import type { Category } from "./Category";
+import type { CategoryVO } from "./CategoryVO";
 
 export interface Transaction {
     id: string;
     title: string;
     amount: number;
-    category: Category;
+    category: CategoryVO;
     date: string;
-}
-
-export interface Pagination {
-    currentPage: number;
-    totalPages: number;
-    totalElements: number;
-    pageSize: number;
 }

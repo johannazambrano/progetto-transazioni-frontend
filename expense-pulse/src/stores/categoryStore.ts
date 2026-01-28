@@ -3,13 +3,13 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { CategoryMapper } from "@/models/mappers/CategoryMapper";
 import type { CategoryResponseDTO } from "@/models/dtos/CategoryResponseDTO";
-import type { Category } from "@/models/vo/Category";
+import type { CategoryVO } from "@/models/vo/CategoryVO";
 
 export const useCategoryStore = defineStore("category", () => {
   console.log("Entriamo dentro useCategoryStore");
 
   //const categories = ref<Category[]>([]);
-  const categories = ref<Category[]>([]);
+  const categories = ref<CategoryVO[]>([]);
   const loading = ref(false);
 
   // Calcola il prossimo codice incrementando l'ultimo (es: "002" -> "003")
@@ -57,7 +57,7 @@ export const useCategoryStore = defineStore("category", () => {
       const code = nextAvailableCode.value;
 
       // 3. Creiamo l'entity
-      const newEntity: Category = {
+      const newEntity: CategoryVO = {
         id: "",
         descrizione: catData.descrizione,
         codice: code,
@@ -79,7 +79,7 @@ export const useCategoryStore = defineStore("category", () => {
     }
   };
 
-  const updateCategory = async (cat: Category) => {
+  const updateCategory = async (cat: CategoryVO) => {
     // Implementa la logica di aggiornamento categoria
     try {
       // convertiamo l'entity in dto

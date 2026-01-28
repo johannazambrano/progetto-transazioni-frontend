@@ -1,17 +1,18 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
-import type { Transaction, Pagination } from "@/models/vo/Transaction";
+import type { Transaction } from "@/models/vo/Transaction";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";
 import type { TransactionResponseDTO } from "@/models/dtos/TransactionResponseDTO";
 import type { FiltroRicercaTransactionDTO } from "@/models/dtos/FiltroRicercaTransactionDTO";
+import type { PaginationVO } from "@/models/vo/PaginationVO";
 
 export const useExpenseStore = defineStore("expense", () => {
   // STATO
   console.log("[useExpenseStore] entriamo dentro useExpenseStore");
 
   const transactions = ref<Transaction[]>([]);
-  const pagination = ref<Pagination | null>(null);
+  const pagination = ref<PaginationVO | null>(null);
   const loading = ref(false); // Utile per mostrare uno spinner
   const transactionToEdit = ref<Transaction | null>(null);
 

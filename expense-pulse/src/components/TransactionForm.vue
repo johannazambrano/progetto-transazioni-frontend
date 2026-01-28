@@ -4,6 +4,7 @@ import { Pencil, Plus, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import type { Transaction } from "../models/vo/Transaction";
+import CategoryForm from "./CategoryForm.vue";
 
 // --- VARIABILI ---
 const isShakingForm = ref(false);
@@ -203,7 +204,7 @@ watch(() => props.editData, (newData) => {
 </script>
 
 <template>
-  <section class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
+  <section v-if="!isCategoryModalOpen" class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
     :class="{ 'animate-shake border-red-200': isShakingForm }">
     <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
       <component :is="isEditing ? Pencil : Plus" :class="isEditing ? 'text-amber-500' : 'text-indigo-600'" :size="18" />
@@ -235,7 +236,7 @@ watch(() => props.editData, (newData) => {
       <div class="w-full md:w-44">
         <div class="flex justify-between items-center mb-1 ml-1">
           <label class="block text-xs font-bold text-gray-400 uppercase">Categoria</label>
-          <button @click="openCategoryModal" class="text-indigo-600 hover:text-indigo-800 transition-colors">
+          <button @click="isCategoryModalOpen = true" class="text-indigo-600 hover:text-indigo-800 transition-colors">
             <Plus :size="14" stroke-width="3" />
           </button>
         </div>
@@ -269,65 +270,14 @@ watch(() => props.editData, (newData) => {
       * Usa il segno meno (es. -50) per registrare una spesa.
     </p>
   </section>
-  <div v-if="isCategoryModalOpen"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold text-gray-900">Nuova Categoria</h3>
-        <button @click="isCategoryModalOpen = false" class="text-gray-400 hover:text-gray-600">
-          <X :size="24" />
-        </button>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Codice (Auto-generato)</label>
-          <input v-model="newCat.codice" type="text" readonly
-            class="w-full p-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nome Categoria</label>
-          <input v-model="newCat.descrizione" type="text" placeholder="Es. Palestra"
-            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Budget Mensile</label>
-            <input v-model.number="newCat.budget" type="number" placeholder="0.00"
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Colore Identificativo</label>
-            <div class="flex items-center gap-3">
-              <div class="relative group">
-                <input v-model="newCat.colore" type="color"
-                  class="w-12 h-12 p-1 bg-white border border-gray-200 rounded-xl cursor-pointer" />
-              </div>
-
-              <div class="flex flex-col">
-                <span class="text-xs font-mono font-bold text-gray-600">{{
-                  newCat.colore.toUpperCase()
-                }}</span>
-                <button @click="newCat.colore = generateRandomColor()" type="button"
-                  class="text-[10px] text-indigo-600 hover:underline flex items-center gap-1">
-                  Cambia colore
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-8 flex gap-3">
-        <button @click="isCategoryModalOpen = false"
-          class="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50">
-          Annulla
-        </button>
-        <button @click="saveCategory"
-          class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">
-          Salva
-        </button>
-      </div>
+ <div v-if="isCategoryModalOpen" class="relative">
+    <div class="flex justify-end m-4">
+      <button @click="isCategoryModalOpen = false"
+        class="absolute top-8 right-4 z-10 bg-red-500 backdrop-blur-sm text-white hover:bg-red-600 transition-all p-2 rounded-full shadow-md"
+        title="Chiudi">
+        <X :size="20" />
+      </button>
     </div>
+    <CategoryForm />
   </div>
 </template>

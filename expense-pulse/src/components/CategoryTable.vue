@@ -5,7 +5,7 @@
  * Integrato con Pinia Store e Lucide Icons.
  */
 
-import type { Category } from "@/models/vo/Category";
+import type { CategoryVO } from "@/models/vo/CategoryVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { Pencil, Trash2 } from "lucide-vue-next";
 
@@ -14,7 +14,7 @@ const categoryStore = useCategoryStore();
 
 // Eventi per comunicare con il compoenente padre
 const emit = defineEmits<{
-  (e: "edit", vategory: Category): void;
+  (e: "edit", vategory: CategoryVO): void;
 }>();
 
 // Formattazione Euro
@@ -25,7 +25,7 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const confirmDelete = async (cat: Category) => {
+const confirmDelete = async (cat: CategoryVO) => {
   if (
     confirm(`Sei sicuro di voler eliminare la categoria "${cat.descrizione}"?`)
   ) {

@@ -1,6 +1,8 @@
 import type { PaginazioneDTO } from '../dtos/PaginazioneDTO';
-import type { TransactionDTO, TransactionResponseDTO } from '../dtos/TransactionDTO';
-import type { Pagination, Transaction } from '../vo/Transaction';
+import type { TransactionDTO } from '../dtos/TransactionDTO';
+import type { TransactionResponseDTO } from '../dtos/TransactionResponseDTO';
+import type { Transaction } from '../vo/Transaction';
+import type { PaginationVO } from '../vo/PaginationVO';
 import { CategoryMapper } from './CategoryMapper';
 
 export class TransactionMapper {
@@ -14,7 +16,7 @@ export class TransactionMapper {
         };
     }
 
-    static toPaginazioneEntity(dto: PaginazioneDTO): Pagination {
+    static toPaginazioneEntity(dto: PaginazioneDTO): PaginationVO {
         return {
             currentPage: dto.numeroPagina,
             totalPages: dto.numeroPagTotali,

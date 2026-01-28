@@ -6,10 +6,10 @@
 import { ref, watch } from "vue";
 import { Plus, Pencil, RotateCcw } from "lucide-vue-next";
 import { useCategoryStore } from "@/stores/categoryStore";
-import type { Category } from "@/models/vo/Category";
+import type { CategoryVO } from "@/models/vo/CategoryVO";
 
 const props = defineProps<{
-  editData?: Category | null;
+  editData?: CategoryVO | null;
 }>();
 
 const emit = defineEmits(["success", "cancel"]);
@@ -58,7 +58,7 @@ const handleSave = async () => {
 
   try {
     if (isEditing.value) {
-      await categoryStore.updateCategory(formData.value as Category);
+      await categoryStore.updateCategory(formData.value as CategoryVO);
     } else {
       await categoryStore.addCategory({
         descrizione: formData.value.descrizione,
@@ -123,14 +123,14 @@ watch(
         <div class="flex items-center gap-2 p-1.5 bg-gray-50 border border-gray-200 rounded-xl h-11.5">
           <input v-model="formData.colore" type="color" class="w-10 h-full bg-transparent border-none cursor-pointer" />
           <span class="text-xs font-mono font-bold text-gray-500 flex-1 text-center">{{ formData.colore.toUpperCase()
-            }}</span>
+          }}</span>
         </div>
       </div>
 
       <div class="flex gap-2 w-full md:w-auto">
         <button @click="handleSave" :class="isEditing
-            ? 'bg-amber-500 hover:bg-amber-600'
-            : 'bg-indigo-600 hover:bg-indigo-700'
+          ? 'bg-amber-500 hover:bg-amber-600'
+          : 'bg-indigo-600 hover:bg-indigo-700'
           "
           class="text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 flex-1 md:flex-none">
           {{ isEditing ? "Salva" : "Aggiungi" }}
