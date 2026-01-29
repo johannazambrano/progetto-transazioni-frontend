@@ -1,32 +1,33 @@
 import type { LayoutDTO } from '@/models/dtos/LayoutDTO';
-import axios from 'axios';
+import api from './api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const path = '/layouts';
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 
 // Configurazione axios con JWT (se usi autenticazione)
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// const apiClient = axios.create({
+//   baseURL: API_BASE_URL,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 
 // Interceptor per aggiungere JWT token
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('jwt_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// apiClient.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('jwt_token');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
-export const layoutApi = {
+export const layoutService = {
   /**
    * Ottiene il layout dell'utente
    */
   async getLayout(layoutName: string = 'default'): Promise<LayoutDTO> {
-    const response = await apiClient.get<LayoutDTO>(`/api/layouts`, {
+    const response = await api.get<LayoutDTO>(`${path}`, {
       params: { name: layoutName },
     });
     return response.data;
@@ -36,7 +37,7 @@ export const layoutApi = {
    * Ottiene tutti i layout dell'utente
    */
   async getAllLayouts(): Promise<LayoutDTO[]> {
-    const response = await apiClient.get<LayoutDTO[]>(`/api/layouts/all`);
+    const response = await api.get<LayoutDTO[]>(`${path}/all`);
     return response.data;
   },
 
@@ -44,7 +45,7 @@ export const layoutApi = {
    * Salva il layout
    */
   async saveLayout(layoutDTO: LayoutDTO): Promise<LayoutDTO> {
-    const response = await apiClient.post<LayoutDTO>(`/api/layouts`, layoutDTO);
+    const response = await api.post<LayoutDTO>(`${path}`, layoutDTO);
     return response.data;
   },
 
@@ -52,7 +53,7 @@ export const layoutApi = {
    * Aggiorna il layout
    */
   async updateLayout(layoutDTO: LayoutDTO): Promise<LayoutDTO> {
-    const response = await apiClient.put<LayoutDTO>(`/api/layouts`, layoutDTO);
+    const response = await api.put<LayoutDTO>(`${path}`, layoutDTO);
     return response.data;
   },
 
@@ -60,14 +61,14 @@ export const layoutApi = {
    * Elimina un layout
    */
   async deleteLayout(layoutName: string): Promise<void> {
-    await apiClient.delete(`/api/layouts/${layoutName}`);
+    await api.delete(`${path}/${layoutName}`);
   },
 
   /**
    * Resetta al layout di default
    */
-  async resetLayout(): Promise<LayoutDTO> {
-    const response = await apiClient.post<LayoutDTO>(`/api/layouts/reset`);
-    return response.data;
-  },
+  // async resetLayout(): Promise<LayoutDTO> {
+  //   const response = await api.post<LayoutDTO>(`${path}/reset`);
+  //   return response.data;
+  // },
 };

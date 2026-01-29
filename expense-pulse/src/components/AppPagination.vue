@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
-import type { Pagination } from "@/models/vo/Transaction";
+import type { PaginationVO } from "@/models/vo/PaginationVO";
 
 defineProps<{
-  pagination: Pagination | null;
+  pagination: PaginationVO | null;
 }>();
 
 const emit = defineEmits(['change']);

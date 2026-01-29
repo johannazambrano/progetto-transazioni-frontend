@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { Pencil, Plus, X } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
-import type { Transaction } from "../models/vo/Transaction";
+import type { TransactionVO } from "../models/vo/TransactionVO";
 import CategoryForm from "./CategoryForm.vue";
 
 // --- VARIABILI ---
@@ -29,7 +29,7 @@ const newTransaction = ref({
   date: new Date().toISOString().split("T")[0],
 });
 const props = defineProps<{
-  editData?: Transaction | null
+  editData?: TransactionVO | null
 }>();
 const emit = defineEmits(['success', 'cancel', 'edit']);
 
@@ -122,7 +122,7 @@ const handleSave = async () => {
       await store.updateTransaction({
         ...transactionData,
         id: editingId.value,
-      } as Transaction);
+      } as TransactionVO);
     } else {
       // Caso nuova operazione: Non generiamo un nuovo ID: lo store userà il Mapper per inviare un DTO pulito.
       // Quarkus riceverà solo title, amount, category e date.
@@ -204,80 +204,83 @@ watch(() => props.editData, (newData) => {
 </script>
 
 <template>
-  <section v-if="!isCategoryModalOpen" class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
-    :class="{ 'animate-shake border-red-200': isShakingForm }">
-    <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
-      <component :is="isEditing ? Pencil : Plus" :class="isEditing ? 'text-amber-500' : 'text-indigo-600'" :size="18" />
-      {{ isEditing ? "Modifica Operazione" : "Nuova Operazione" }}
-    </h2>
-    <div class="flex flex-col md:flex-row gap-4 items-end">
-      <div class="flex-1 w-full relative">
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrizione</label>
-        <input v-model="newTransaction.title" type="text" placeholder="Es. Affitto o Stipendio"
-          class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-          :class="{
-            'border-red-400': showErrors && !newTransaction.title.trim(),
-          }" />
-        <p v-if="showErrors && !newTransaction.title.trim()" class="text-[10px] text-red-500 mt-1 absolute left-1">
-          Campo obbligatorio
-        </p>
-      </div>
-      <div class="w-full md:w-32 relative">
-        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Importo</label>
-        <input v-model.number="newTransaction.amount" type="number" placeholder="0.00"
-          class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-          :class="{
-            'border-red-400': showErrors && newTransaction.amount === 0,
-          }" />
-        <p v-if="showErrors && newTransaction.amount === 0" class="text-[10px] text-red-500 mt-1 absolute left-1">
-          Deve essere ≠ 0
-        </p>
-      </div>
-      <div class="w-full md:w-44">
-        <div class="flex justify-between items-center mb-1 ml-1">
-          <label class="block text-xs font-bold text-gray-400 uppercase">Categoria</label>
-          <button @click="isCategoryModalOpen = true" class="text-indigo-600 hover:text-indigo-800 transition-colors">
-            <Plus :size="14" stroke-width="3" />
+  <div>
+    <section v-if="!isCategoryModalOpen"
+      class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-10 transition-all"
+      :class="{ 'animate-shake border-red-200': isShakingForm }">
+      <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
+        <component :is="isEditing ? Pencil : Plus" :class="isEditing ? 'text-amber-500' : 'text-indigo-600'" :size="18" />
+        {{ isEditing ? "Modifica Operazione" : "Nuova Operazione" }}
+      </h2>
+      <div class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-1 w-full relative">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrizione</label>
+          <input v-model="newTransaction.title" type="text" placeholder="Es. Affitto o Stipendio"
+            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+            :class="{
+              'border-red-400': showErrors && !newTransaction.title.trim(),
+            }" />
+          <p v-if="showErrors && !newTransaction.title.trim()" class="text-[10px] text-red-500 mt-1 absolute left-1">
+            Campo obbligatorio
+          </p>
+        </div>
+        <div class="w-full md:w-32 relative">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Importo</label>
+          <input v-model.number="newTransaction.amount" type="number" placeholder="0.00"
+            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+            :class="{
+              'border-red-400': showErrors && newTransaction.amount === 0,
+            }" />
+          <p v-if="showErrors && newTransaction.amount === 0" class="text-[10px] text-red-500 mt-1 absolute left-1">
+            Deve essere ≠ 0
+          </p>
+        </div>
+        <div class="w-full md:w-44">
+          <div class="flex justify-between items-center mb-1 ml-1">
+            <label class="block text-xs font-bold text-gray-400 uppercase">Categoria</label>
+            <button @click="isCategoryModalOpen = true" class="text-indigo-600 hover:text-indigo-800 transition-colors">
+              <Plus :size="14" stroke-width="3" />
+            </button>
+          </div>
+          <select v-model="newTransaction.category"
+            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option disabled value="">Seleziona...</option>
+            <option v-if="categoryStore.categories.length === 0" disabled>
+              Caricamento categorie...
+            </option>
+            <option v-for="cat in categoryStore.categories" :key="cat.id || cat.codice" :value="cat.descrizione">
+              {{ cat.descrizione }}
+            </option>
+          </select>
+        </div>
+        <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <button @click="handleSave" :class="[
+            isEditing
+              ? 'bg-amber-500 hover:bg-amber-600'
+              : 'bg-indigo-600 hover:bg-indigo-700',
+          ]" class="text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+            {{ isEditing ? "Salva Modifiche" : "Aggiungi" }}
+          </button>
+
+          <button v-if="isEditing" @click="cancelEdit"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-xl font-bold transition-all">
+            Annulla
           </button>
         </div>
-        <select v-model="newTransaction.category"
-          class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-          <option disabled value="">Seleziona...</option>
-          <option v-if="categoryStore.categories.length === 0" disabled>
-            Caricamento categorie...
-          </option>
-          <option v-for="cat in categoryStore.categories" :key="cat.id || cat.codice" :value="cat.descrizione">
-            {{ cat.descrizione }}
-          </option>
-        </select>
       </div>
-      <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-        <button @click="handleSave" :class="[
-          isEditing
-            ? 'bg-amber-500 hover:bg-amber-600'
-            : 'bg-indigo-600 hover:bg-indigo-700',
-        ]" class="text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-          {{ isEditing ? "Salva Modifiche" : "Aggiungi" }}
-        </button>
-
-        <button v-if="isEditing" @click="cancelEdit"
-          class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-xl font-bold transition-all">
-          Annulla
+      <p class="text-[10px] text-gray-400 mt-3">
+        * Usa il segno meno (es. -50) per registrare una spesa.
+      </p>
+    </section>
+    <div v-if="isCategoryModalOpen" class="relative">
+      <div class="flex justify-end m-4">
+        <button @click="isCategoryModalOpen = false"
+          class="absolute top-8 right-4 z-10 bg-red-500 backdrop-blur-sm text-white hover:bg-red-600 transition-all p-2 rounded-full shadow-md"
+          title="Chiudi">
+          <X :size="20" />
         </button>
       </div>
+      <CategoryForm />
     </div>
-    <p class="text-[10px] text-gray-400 mt-3">
-      * Usa il segno meno (es. -50) per registrare una spesa.
-    </p>
-  </section>
- <div v-if="isCategoryModalOpen" class="relative">
-    <div class="flex justify-end m-4">
-      <button @click="isCategoryModalOpen = false"
-        class="absolute top-8 right-4 z-10 bg-red-500 backdrop-blur-sm text-white hover:bg-red-600 transition-all p-2 rounded-full shadow-md"
-        title="Chiudi">
-        <X :size="20" />
-      </button>
-    </div>
-    <CategoryForm />
   </div>
 </template>

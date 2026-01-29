@@ -2,6 +2,7 @@
 import { useExpenseStore } from "../stores/expenseStore";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
+import { X } from "lucide-vue-next";
 
 // --- STORE ---
 const store = useExpenseStore();

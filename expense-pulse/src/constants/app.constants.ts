@@ -1,5 +1,7 @@
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 
+
+// --- LAYOUTS ---
 export const DEFAULT_LAYOUT_HOME: LayoutItemVO[] = [
   { i: "balance", x: 0, y: 0, w: 12, h: 3, minW: 8, maxW: 12, minH: 3, maxH: 3, static: false },
   { i: "expenseChart", x: 0, y: 4, w: 6, h: 9, minW: 4, maxW: 12, minH: 6, maxH: 12, static: false },
@@ -16,3 +18,5 @@ export const DEFAULT_LAYOUT_CATEGORIES: LayoutItemVO[] = [
   { i: "form", x: 0, y: 0, w: 12, h: 4, minW: 8, maxW: 12, minH: 4, maxH: 10, static: false },
   { i: "table", x: 0, y: 6, w: 12, h: 10, minW: 6, maxW: 12, minH: 8, maxH: 12, static: false },
 ];
+
+export const USE_BACKEND_LAYOUTS = false; // ⚠️ Cambia in true quando il backend è pronto

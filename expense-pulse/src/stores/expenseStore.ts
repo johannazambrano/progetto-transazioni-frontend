@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
-import type { Transaction } from "@/models/vo/Transaction";
+import type { TransactionVO } from "@/models/vo/TransactionVO";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";
 import type { TransactionResponseDTO } from "@/models/dtos/TransactionResponseDTO";
 import type { FiltroRicercaTransactionDTO } from "@/models/dtos/FiltroRicercaTransactionDTO";
@@ -11,10 +11,11 @@ export const useExpenseStore = defineStore("expense", () => {
   // STATO
   console.log("[useExpenseStore] entriamo dentro useExpenseStore");
 
-  const transactions = ref<Transaction[]>([]);
+  const transactions = ref<TransactionVO[]>([]);
   const pagination = ref<PaginationVO | null>(null);
   const loading = ref(false); // Utile per mostrare uno spinner
-  const transactionToEdit = ref<Transaction | null>(null);
+  const transactionToEdit = ref<TransactionVO | null>(null);
+
 
   // GETTERS: calcoli automatici (reattivi)
   const totalBalance = computed(() =>
@@ -34,7 +35,7 @@ export const useExpenseStore = defineStore("expense", () => {
   );
 
   // AZIONI
-  const startEdit = (transaction: Transaction) => {
+  const startEdit = (transaction: TransactionVO) => {
     transactionToEdit.value = transaction;
     // Scrolla la pagina verso l'alto per mostrare il form
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -87,10 +88,10 @@ export const useExpenseStore = defineStore("expense", () => {
     }
   };
 
-  const addTransaction = async (transactionData: Omit<Transaction, "id">) => {
+  const addTransaction = async (transactionData: Omit<TransactionVO, "id">) => {
     try {
       // 1. Creiamo un'entità temporanea (id vuoto per la creazione)
-      const newEntity: Transaction = {
+      const newEntity: TransactionVO = {
         ...transactionData,
         id: "",
       };
@@ -120,7 +121,7 @@ export const useExpenseStore = defineStore("expense", () => {
     }
   };
 
-  const updateTransaction = async (updatedTransaction: Transaction) => {
+  const updateTransaction = async (updatedTransaction: TransactionVO) => {
     loading.value = true;
     try {
       // 1. Trasformiamo l'entity in DTO usando il mapper

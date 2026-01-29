@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component } from "vue";
+import { ref, onMounted, type Component, computed } from "vue";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
@@ -13,10 +13,12 @@ import Header from "@/components/Header.vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 import _GridContainer from "@/components/GridContainer.vue";
+import { useLayoutStore } from "@/stores/layoutStore";
 
 // --- STORE ---
 const store = useExpenseStore();
 const categoryStore = useCategoryStore();
+const layoutStore = useLayoutStore();
 
 // --- VARIABILI ---
 // Mappa dei componenti - chiave: ID componente
@@ -31,8 +33,14 @@ const componentMap: Record<string, Component> = {
 const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
-const layout = ref<LayoutItemVO[]>([]);
+// const layout = ref<LayoutItemVO[]>([]);
 
+// --- COMPUTED ---
+// Il layout ora viene dallo store invece che da ref locale
+const layout = computed({
+  get: () => layoutStore.layoutItems,
+  set: (newLayout) => layoutStore.updateLayoutItems(newLayout)
+});
 
 // --- FUNZIONI
 // Funzione per ottenere il componente dalla mappa
@@ -41,12 +49,17 @@ const getComponent = (itemId: string): Component | undefined => {
 };
 
 onMounted(async () => {
-  // Carica il layout salvato
-  layout.value = loadLayout();
+  try {
+    // Carica il layout dal backend
+    await layoutStore.fetchLayout('default');
 
-  // Carica i dati degli store
-  store.fetchTransactions();
-  await categoryStore.fetchCategories();
+    // Carica i dati degli store
+    store.fetchTransactions();
+    await categoryStore.fetchCategories();
+  } catch (error) {
+    console.error("❌ Errore nel caricamento del layout:", error);
+  }
+
 
   // Scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -104,11 +117,14 @@ const saveLayout = (layoutToSave: LayoutItemVO[]) => {
 /**
  * Resetta il layout al default
  */
-const resetLayout = () => {
+const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    layout.value = [...DEFAULT_LAYOUT_HOME];
-    // saveLayout(layout.value);
-    console.log("🔄 Layout resettato");
+    try {
+      await layoutStore.resetLayout();
+      console.log("🔄 Layout resettato");
+    } catch (error) {
+      console.error("❌ Errore nel reset del layout");
+    }
   }
 };
 
@@ -116,17 +132,20 @@ const resetLayout = () => {
  * Handler per l'evento di aggiornamento del layout
  * Viene chiamato quando l'utente trascina o ridimensiona un elemento
  */
-const handleLayoutUpdated = (newLayout: LayoutItemVO[]) => {
+const handleLayoutUpdated = async (newLayout: LayoutItemVO[]) => {
+
+  layoutStore.updateLayoutItems(newLayout);
+
   // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
   if (!editMode.value) {
-    saveLayout(newLayout);
+    await layoutStore.saveLayout();
   }
 };
 
-const toggleEditMode = () => {
+const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit, salva il layout
   if (!editMode.value) {
-    saveLayout(layout.value);
+    await layoutStore.saveLayout();
     console.log("🔒 Layout bloccato e salvato");
   }
 
@@ -138,6 +157,12 @@ const toggleEditMode = () => {
   <main class="max-w-5xl mx-auto p-6">
     <header>
       <Header />
+      <div 
+        v-if="layoutStore.isUsingFallback" 
+        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm"
+      >
+        ⚠️ Modalità sviluppo: usando layout locale
+      </div>
     </header>
 
     <div class="flex justify-end mr-3">
