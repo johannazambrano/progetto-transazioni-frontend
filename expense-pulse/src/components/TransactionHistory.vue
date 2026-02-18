@@ -70,7 +70,7 @@ const confirmDelete = async (t: TransactionVO) => {
       // Lo store aggiornerà la lista e tutti i componenti (Grafici, Saldo) 
       // reagiranno automaticamente grazie alla reattività di Pinia.
     } catch (error) {
-      console.error("Errore durante l'eliminazione", error);
+      console.error("[TransactionHistory.confirmDelete] ❌ Errore durante l'eliminazione", error);
     }
   }
 };
@@ -120,7 +120,7 @@ const saveTransaction = async () => {
     };
     alert("Categoria creata con successo");
   } catch (e: any) {
-    console.error(e);
+    console.error("[TransactionHistory.saveTransaction] ❌ Errore durante il salvataggio della categoria:", e);
     // e.message in questo punto conterrà "La categoria $categoria esiste già" lanciato dallo store
     alert(e.message || "Errore durante il salvataggio della categoria.");
   }
@@ -128,62 +128,64 @@ const saveTransaction = async () => {
 </script>
 
 <template>
-  <div>
-    <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+  <div class="transaction-history-wrapper">
+    <section class="bg-white rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
         <h2 class="text-xl font-bold text-gray-800">Cronologia</h2>
         <span class="text-sm text-gray-500">{{ store.transactions.length }} operazioni</span>
       </div>
 
-      <ul class="divide-y divide-gray-100">
-        <li v-for="t in store.transactions" :key="t.id"
-          class="p-5 hover:bg-gray-50 transition-colors flex items-center justify-between group">
-          <div class="flex items-center gap-4">
-            <div :class="[
-              'p-3 rounded-2xl transition-all',
-              t.amount > 0
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-rose-100 text-rose-500',
-            ]">
-              <component :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle" :size="24" />
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <ul class="divide-y divide-gray-100">
+          <li v-for="t in store.transactions" :key="t.id"
+            class="p-5 hover:bg-gray-50 transition-colors flex items-center justify-between group">
+            <div class="flex items-center gap-4">
+              <div :class="[
+                'p-3 rounded-2xl transition-all',
+                t.amount > 0
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-rose-100 text-rose-500',
+              ]">
+                <component :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle" :size="24" />
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">{{ t.title }}</p>
+                <p class="text-xs text-gray-400 flex items-center gap-1">
+                  <Calendar :size="12" /> {{ t.date }} •
+                  {{ t.category.descrizione }}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="font-bold text-gray-900">{{ t.title }}</p>
-              <p class="text-xs text-gray-400 flex items-center gap-1">
-                <Calendar :size="12" /> {{ t.date }} •
-                {{ t.category.descrizione }}
-              </p>
+            <div class="flex items-center gap-2">
+              <span :class="[
+                'font-black text-lg mr-4',
+                t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
+              ]">
+                {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
+              </span>
+
+              <button @click="startEdit(t)"
+                class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2">
+                <Pencil :size="18" />
+              </button>
+
+              <button @click="confirmDelete(t)"
+                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Elimina transazione">
+                <Trash2 :size="18" />
+              </button>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span :class="[
-              'font-black text-lg mr-4',
-              t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
-            ]">
-              {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
-            </span>
+          </li>
+        </ul>
 
-            <button @click="startEdit(t)"
-              class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2">
-              <Pencil :size="18" />
-            </button>
-
-            <button @click="confirmDelete(t)"
-              class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Elimina transazione">
-              <Trash2 :size="18" />
-            </button>
-          </div>
-        </li>
-      </ul>
-
-      <AppPagination :pagination="store.pagination" @change="handlePageChange" />
-
-      <div v-if="store.transactions.length === 0" class="p-20 text-center text-gray-400">
-        <p>Non ci sono ancora transazioni. Inizia aggiungendone una!</p>
+        
+        <div v-if="store.transactions.length === 0" class="p-20 text-center text-gray-400">
+          <p>Non ci sono ancora transazioni. Inizia aggiungendone una!</p>
+        </div>
+        <AppPagination :pagination="store.pagination" @change="handlePageChange" />
       </div>
     </section>
-    <div v-if="isTransactionModalOpen"
+    <!-- <div v-if="isTransactionModalOpen"
       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
         <div class="flex justify-between items-center mb-6">
@@ -224,16 +226,26 @@ const saveTransaction = async () => {
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 
 
 <style scoped>
-/* Ottimizzazione scrollbar per un look più moderno nella dashboard */
+/* ⬅️ Wrapper occupa tutta l'altezza del grid-item */
+.transaction-history-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+/* Scrollbar personalizzata */
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
@@ -241,11 +253,12 @@ const saveTransaction = async () => {
   border-radius: 10px;
 }
 
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-clamp: 1;
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #d1d5db;
+}
+
+/* ⬅️ Importante per flex-1 con overflow */
+.min-h-0 {
+  min-height: 0;
 }
 </style>

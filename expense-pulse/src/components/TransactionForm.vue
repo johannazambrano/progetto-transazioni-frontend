@@ -133,7 +133,7 @@ const handleSave = async () => {
     showErrors.value = false;
     cancelEdit();
   } catch (error) {
-    console.error("Errore durante il salvataggio della transazione:", error);
+    console.error("[TransactionForm.handleSave] ❌ Errore durante il salvataggio della transazione:", error);
     alert("Si è verificato un errore durante il salvataggio.");
   }
 };
@@ -176,7 +176,7 @@ const saveCategory = async () => {
     };
     alert("Categoria creata con successo");
   } catch (e: any) {
-    console.error(e);
+    console.error("[TransactionForm.saveCategory] ❌ Errore durante il salvataggio della categoria:", e);
     alert(e.message || "Errore durante il salvataggio della categoria.");
   }
 };

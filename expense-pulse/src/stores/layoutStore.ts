@@ -14,7 +14,7 @@ export const useLayoutStore = defineStore('layout', () => {
   const allLayouts = ref<LayoutVO[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const isUsingFallback = ref(false); // ⬅️ Aggiungi questa riga
+  const isUsingFallback = ref(false); // 
 
 
   // --- GETTERS (computed) ---
@@ -98,11 +98,11 @@ export const useLayoutStore = defineStore('layout', () => {
     isUsingFallback.value = false;
 
     if (!USE_BACKEND_LAYOUTS) {
-      console.warn('⚠️ Backend layouts disabilitato, uso layout dalle costanti');
+      console.warn('[layoutStore.fetchLayout] ⚠️ Backend layouts disabilitato, uso layout dalle costanti');
       currentLayout.value = createDefaultLayoutVO();
       isUsingFallback.value = true;
       loading.value = false;
-      console.log('🔍 USE_BACKEND_LAYOUTS:', USE_BACKEND_LAYOUTS);
+      console.log('[layoutStore.fetchLayout] 🔍 USE_BACKEND_LAYOUTS:', USE_BACKEND_LAYOUTS);
       return;
     }
 
@@ -111,10 +111,10 @@ export const useLayoutStore = defineStore('layout', () => {
         params: { name: layoutName },
       });
       currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('✅ Layout caricato:', layoutName);
+      console.log('[layoutStore.fetchLayout] ✅ Layout caricato:', layoutName);
     } catch (e) {
-      console.error('❌ Errore nel caricamento del layout dal backend:', e);
-      console.warn('🔄 Uso layout di fallback dalle costanti');
+      console.error('[layoutStore.fetchLayout] ❌ Errore nel caricamento del layout dal backend:', e);
+      console.warn('[layoutStore.fetchLayout] 🔄 Uso layout di fallback dalle costanti');
       currentLayout.value = createDefaultLayoutVO();
       isUsingFallback.value = true;
       error.value = 'Backend non disponibile, uso layout locale';
@@ -133,9 +133,9 @@ export const useLayoutStore = defineStore('layout', () => {
     try {
       const response = await api.get<LayoutDTO[]>('/layouts/all');
       allLayouts.value = response.data.map(LayoutMapper.toVO);
-      console.log('✅ Tutti i layout caricati:', allLayouts.value.length);
+      console.log('[layoutStore.fetchAllLayouts] ✅ Tutti i layout caricati:', allLayouts.value.length);
     } catch (e) {
-      console.error('❌ Errore nel caricamento dei layout:', e);
+      console.error('[layoutStore.fetchAllLayouts] ❌ Errore nel caricamento dei layout:', e);
       error.value = 'Impossibile caricare i layout';
     } finally {
       loading.value = false;
@@ -146,6 +146,7 @@ export const useLayoutStore = defineStore('layout', () => {
    * Salva il layout corrente
    */
   const saveLayout = async () => {
+    console.log('[layoutStore.saveLayout] saveLayout', currentLayout.value);
     if (!currentLayout.value) {
       error.value = 'Nessun layout da salvare';
       return;
@@ -164,9 +165,9 @@ export const useLayoutStore = defineStore('layout', () => {
       const dto = LayoutMapper.toDTO(currentLayout.value);
       const response = await api.post<LayoutDTO>('/layouts', dto);
       currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('💾 Layout salvato');
+      console.log('[layoutStore.saveLayout] 💾 Layout salvato');
     } catch (e) {
-      console.error('❌ Errore nel salvataggio del layout:', e);
+      console.error('[layoutStore.saveLayout] ❌ Errore nel salvataggio del layout:', e);
       error.value = 'Impossibile salvare il layout';
       throw e;
     } finally {
@@ -190,9 +191,9 @@ export const useLayoutStore = defineStore('layout', () => {
       const dto = LayoutMapper.toDTO(currentLayout.value);
       const response = await api.put<LayoutDTO>('/layouts', dto);
       currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('🔄 Layout aggiornato');
+      console.log('[layoutStore.updateLayout] 🔄 Layout aggiornato');
     } catch (e) {
-      console.error('❌ Errore nell\'aggiornamento del layout:', e);
+      console.error('[layoutStore.updateLayout] ❌ Errore nell\'aggiornamento del layout:', e);
       error.value = 'Impossibile aggiornare il layout';
       throw e;
     } finally {
@@ -223,9 +224,9 @@ export const useLayoutStore = defineStore('layout', () => {
         await fetchLayout('default');
       }
       
-      console.log('🗑️ Layout eliminato:', layoutName);
+      console.log('[layoutStore.deleteLayout] 🗑️ Layout eliminato:', layoutName);
     } catch (e) {
-      console.error('❌ Errore nell\'eliminazione del layout:', e);
+      console.error('[layoutStore.deleteLayout] ❌ Errore nell\'eliminazione del layout:', e);
       error.value = 'Impossibile eliminare il layout';
     } finally {
       loading.value = false;
@@ -249,11 +250,11 @@ export const useLayoutStore = defineStore('layout', () => {
     try {
       const response = await api.post<LayoutDTO>('/layouts/reset');
       currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('🔄 Layout resettato');
+      console.log('[layoutStore.resetLayout] 🔄 Layout resettato');
     } catch (e) {
-      console.error('❌ Errore nel reset del layout:', e);
+      console.error('[layoutStore.resetLayout] ❌ Errore nel reset del layout:', e);
     
-      console.warn('🔄 Reset con fallback alle costanti');
+      console.warn('[layoutStore.resetLayout] 🔄 Reset con fallback alle costanti');
       currentLayout.value = createDefaultLayoutVO();
       isUsingFallback.value = true;
       error.value = 'Backend non disponibile, layout resettato localmente';
@@ -304,10 +305,10 @@ export const useLayoutStore = defineStore('layout', () => {
       };
       
       currentLayout.value.layout.push(newItem);
-      console.log('➕ Componente aggiunto:', componentId);
+      console.log('[layoutStore.addComponent] ➕ Componente aggiunto:', componentId);
       return newItem;
     } catch (e) {
-      console.error('❌ Errore nell\'aggiunta del componente:', e);
+      console.error('[layoutStore.addComponent] ❌ Errore nell\'aggiunta del componente:', e);
       error.value = 'Impossibile aggiungere il componente';
       return null;
     }
@@ -326,12 +327,12 @@ export const useLayoutStore = defineStore('layout', () => {
       const index = currentLayout.value.layout.findIndex(item => item.i === componentId);
       if (index !== -1) {
         currentLayout.value.layout.splice(index, 1);
-        console.log('➖ Componente rimosso:', componentId);
+        console.log('[layoutStore.removeComponent] ➖ Componente rimosso:', componentId);
         return true;
       }
       return false;
     } catch (e) {
-      console.error('❌ Errore nella rimozione del componente:', e);
+      console.error('[layoutStore.removeComponent] ❌ Errore nella rimozione del componente:', e);
       error.value = 'Impossibile rimuovere il componente';
       return false;
     }
@@ -347,7 +348,7 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     currentLayout.value.layout = items;
-    console.log('🔄 Layout items aggiornati');
+    console.log('[layoutStore.updateLayoutItems] 🔄 Layout items aggiornati');
   };
 
   /**

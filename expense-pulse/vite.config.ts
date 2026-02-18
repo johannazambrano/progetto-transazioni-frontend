@@ -15,4 +15,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  // Aggiunte per il debug con IDE
+  css: {
+    devSourcemap: true
+  },
+  server: {
+    sourcemapIgnoreList: false
+  }
 })

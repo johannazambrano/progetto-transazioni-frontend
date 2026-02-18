@@ -22,7 +22,7 @@ const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
     layout.value = [...DEFAULT_LAYOUT_HOME];
     // saveLayout(layout.value);
-    console.log("🔄 Layout resettato");
+    console.log("[EditControl.resetLayout] 🔄 Layout resettato");
   }
 };
 
@@ -30,7 +30,7 @@ const toggleEditMode = () => {
   // Se stiamo uscendo dalla modalità edit, salva il layout
   if (!editMode.value) {
     saveLayout(layout.value);
-    console.log("🔒 Layout bloccato e salvato");
+    console.log("[EditControl.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
 
   editMode.value = !editMode.value;
@@ -42,9 +42,9 @@ const toggleEditMode = () => {
 const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-    console.log("💾 Layout salvato");
+    console.log("[EditControl.saveLayout] 💾 Layout salvato");
   } catch (error) {
-    console.error("❌ Errore nel salvataggio del layout:", error);
+    console.error("[EditControl.saveLayout] ❌ Errore nel salvataggio del layout:", error);
   }
 };
 

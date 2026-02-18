@@ -60,18 +60,18 @@ const loadLayout = (): LayoutItemVO[] => {
       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
 
       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
-        console.log("✅ Layout caricato da localStorage");
+        console.log("[CategoriesView.loadLayout] ✅ Layout caricato da localStorage");
         return parsed;
       } else {
-        console.warn("⚠️ Layout salvato incompleto, uso quello di default");
+        console.warn("[CategoriesView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
         return [...DEFAULT_LAYOUT_CATEGORIES];
       }
     }
   } catch (error) {
-    console.error("❌ Errore nel caricamento del layout:", error);
+    console.error("[CategoriesView.loadLayout] ❌ Errore nel caricamento del layout:", error);
   }
 
-  console.log("📋 Uso layout di default");
+  console.log("[CategoriesView.loadLayout] 📋 Uso layout di default");
   return [...DEFAULT_LAYOUT_CATEGORIES];
 };
 
@@ -81,9 +81,9 @@ const loadLayout = (): LayoutItemVO[] => {
 const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-    console.log("💾 Layout salvato");
+    console.log("[CategoriesView.saveLayout] 💾 Layout salvato");
   } catch (error) {
-    console.error("❌ Errore nel salvataggio del layout:", error);
+    console.error("[CategoriesView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
   }
 };
 
@@ -92,7 +92,7 @@ const toggleEditMode = () => {
   // Se stiamo uscendo dalla modalità edit, salva il layout
   if (!editMode.value) {
     saveLayout(layout.value);
-    console.log("🔒 Layout bloccato e salvato");
+    console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
 
   editMode.value = !editMode.value;
@@ -105,15 +105,15 @@ const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
     layout.value = [...DEFAULT_LAYOUT_CATEGORIES];
     // saveLayout(layout.value);
-    console.log("🔄 Layout resettato");
+    console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
   }
 };
 </script>
 
 <template>
-  <main class="max-w-5xl mx-auto p-6">
+  <main class="mx-auto p-6">
     <header>
-      <Header />
+      <!-- <Header /> -->
     </header>
 
     <div class="flex justify-end mr-3 mb-4">

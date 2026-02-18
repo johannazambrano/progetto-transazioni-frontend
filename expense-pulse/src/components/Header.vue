@@ -4,7 +4,7 @@ import { House, Layers, ShoppingBag } from "lucide-vue-next";
 </script>
 
 <template>
-  <div class="mb-8 flex justify-between items-center">
+  <div class="mb-8 flex justify-between items-center p-4">
       <div>
         <div class="flex items-center gap-2">
           <ShoppingBag :size="24" />

@@ -71,7 +71,7 @@ export const useExpenseStore = defineStore("expense", () => {
         },
       };
 
-      console.log("[expenseStore] Inviando payload ricerca:", payload);
+      console.log("[expenseStore.fetchTransactions] Inviando payload ricerca:", payload);
 
       const response = await api.post<TransactionResponseDTO>(
         "/transactions/ricerca",
@@ -82,7 +82,7 @@ export const useExpenseStore = defineStore("expense", () => {
       transactions.value = mapped.transactions;
       pagination.value = mapped.pagination;
     } catch (error) {
-      console.error("Errore nella ricerca transazioni: ", error);
+      console.error("[expenseStore.fetchTransactions] ❌ Errore nella ricerca transazioni: ", error);
     } finally {
       loading.value = false;
     }
@@ -106,7 +106,7 @@ export const useExpenseStore = defineStore("expense", () => {
       // 4. Refresh della lista
       await fetchTransactions();
     } catch (error) {
-      console.error("Errore add transaction:", error);
+      console.error("[expenseStore.addTransaction] ❌ Errore add transaction:", error);
       throw error; // Rilanciamo l'errore per gestirlo nel componente
     }
   };
@@ -116,7 +116,7 @@ export const useExpenseStore = defineStore("expense", () => {
       await api.delete(`/transactions/${id}`);
       await fetchTransactions();
     } catch (error) {
-      console.error("Errore delete:", error);
+      console.error("[expenseStore.deleteTransaction] ❌ Errore delete:", error);
       throw error; // Rilanciamo l'errore
     }
   };
@@ -137,11 +137,11 @@ export const useExpenseStore = defineStore("expense", () => {
       cancelEdit();
 
       console.log(
-        `[expenseStore] Transazione ${updatedTransaction.id} aggiornata con successo`,
+        `[expenseStore.updateTransaction] Transazione ${updatedTransaction.id} aggiornata con successo`,
       );
     } catch (error) {
       console.error(
-        "Errore durante l'aggiornamento della transazione: ",
+        "[expenseStore.updateTransaction] ❌ Errore durante l'aggiornamento della transazione: ",
         error,
       );
       throw error; // Rilanciamo

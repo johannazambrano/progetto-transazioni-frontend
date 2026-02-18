@@ -6,7 +6,7 @@ import type { CategoryResponseDTO } from "@/models/dtos/CategoryResponseDTO";
 import type { CategoryVO } from "@/models/vo/CategoryVO";
 
 export const useCategoryStore = defineStore("category", () => {
-  console.log("Entriamo dentro useCategoryStore");
+  console.log("[categoryStore] Entriamo dentro useCategoryStore");
 
   //const categories = ref<Category[]>([]);
   const categories = ref<CategoryVO[]>([]);
@@ -14,7 +14,7 @@ export const useCategoryStore = defineStore("category", () => {
 
   // Calcola il prossimo codice incrementando l'ultimo (es: "002" -> "003")
   const nextAvailableCode = computed(() => {
-    console.log("category lunghezza: ", categories.value.length);
+    console.log("[categoryStore.nextAvailableCode] 🔍 category lunghezza: ", categories.value.length);
     if (categories.value.length === 0) return "001";
 
     const codes = categories.value
@@ -30,7 +30,7 @@ export const useCategoryStore = defineStore("category", () => {
       const response = await api.get<CategoryResponseDTO>("/categories");
       categories.value = response.data.categories.map(CategoryMapper.toEntity);
     } catch (error) {
-      console.error("Errore nel caricamento categorie:", error);
+      console.error("[categoryStore.fetchCategories] ❌ Errore nel caricamento categorie:", error);
     } finally {
       loading.value = false;
     }
@@ -74,7 +74,7 @@ export const useCategoryStore = defineStore("category", () => {
       // 5. Refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante l'aggiunta:", error);
+      console.error("[categoryStore.addCategory] ❌ Errore durante l'aggiunta:", error);
       throw error;
     }
   };
@@ -90,7 +90,7 @@ export const useCategoryStore = defineStore("category", () => {
       // refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante la modifica della categoria:", error);
+      console.error("[categoryStore.updateCategory] ❌ Errore durante la modifica della categoria:", error);
       throw error;
     }
   };
@@ -103,7 +103,7 @@ export const useCategoryStore = defineStore("category", () => {
       // refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante l'eliminazione della categoria:", error);
+      console.error("[categoryStore.deleteCategory] ❌ Errore durante l'eliminazione della categoria:", error);
     }
   };
 

@@ -56,7 +56,7 @@ onMounted(async () => {
     store.fetchTransactions();
     await categoryStore.fetchCategories();
   } catch (error) {
-    console.error("❌ Errore nel caricamento del layout:", error);
+    console.error("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);
   }
 
 
@@ -86,18 +86,18 @@ const loadLayout = (): LayoutItemVO[] => {
       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
 
       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
-        console.log("✅ Layout caricato da localStorage");
+        console.log("[HomeView.loadLayout] ✅ Layout caricato da localStorage");
         return parsed;
       } else {
-        console.warn("⚠️ Layout salvato incompleto, uso quello di default");
+        console.warn("[HomeView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
         return [...DEFAULT_LAYOUT_HOME];
       }
     }
   } catch (error) {
-    console.error("❌ Errore nel caricamento del layout:", error);
+    console.error("[HomeView.loadLayout] ❌ Errore nel caricamento del layout:", error);
   }
 
-  console.log("📋 Uso layout di default");
+  console.log("[HomeView.loadLayout] 📋 Uso layout di default");
   return [...DEFAULT_LAYOUT_HOME];
 };
 
@@ -107,9 +107,9 @@ const loadLayout = (): LayoutItemVO[] => {
 const saveLayout = (layoutToSave: LayoutItemVO[]) => {
   try {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-    console.log("💾 Layout salvato");
+    console.log("[HomeView.saveLayout] 💾 Layout salvato");
   } catch (error) {
-    console.error("❌ Errore nel salvataggio del layout:", error);
+    console.error("[HomeView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
   }
 };
 
@@ -120,9 +120,9 @@ const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
     try {
       await layoutStore.resetLayout();
-      console.log("🔄 Layout resettato");
+      console.log("[HomeView.resetLayout] 🔄 Layout resettato");
     } catch (error) {
-      console.error("❌ Errore nel reset del layout");
+      console.error("[HomeView.resetLayout] ❌ Errore nel reset del layout");
     }
   }
 };
@@ -145,7 +145,7 @@ const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit (quindi editMode è true), salva il layout
   if (editMode.value) {
     await layoutStore.saveLayout();
-    console.log("🔒 Layout bloccato e salvato");
+    console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
 
   editMode.value = !editMode.value;
@@ -153,9 +153,9 @@ const toggleEditMode = async () => {
 </script>
 
 <template>
-  <main class="max-w-5xl mx-auto p-6">
+  <main class="mx-auto p-6">
     <header>
-      <Header />
+      <!-- <Header /> -->
       <div 
         v-if="layoutStore.isUsingFallback" 
         class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm"
@@ -203,5 +203,9 @@ const toggleEditMode = async () => {
 :deep(.vue-grid-item.resizing) {
   opacity: 0.9;
   z-index: 3;
+}
+
+main {
+  padding-bottom: 120px; /* ⬅️ Aggiungi spazio per il footer */
 }
 </style>
