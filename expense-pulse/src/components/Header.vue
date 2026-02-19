@@ -4,13 +4,13 @@ import { House, Layers, ShoppingBag } from "lucide-vue-next";
 </script>
 
 <template>
-  <div class="mb-8 flex justify-between items-center p-4">
+  <div class="mb-8 flex justify-between items-center p-4 bg-gradient-to-r from-gray-700 to-gray-800 rounded-b-lg">
       <div>
         <div class="flex items-center gap-2">
-          <ShoppingBag :size="24" />
-          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">ExpensePulse</h1>
+          <ShoppingBag :size="24" color="#ffffff"/>
+          <h1 class="text-3xl font-bold text-gray-100 tracking-tight">ExpensePulse</h1>
         </div>
-        <p class="text-gray-500">Monitora le tue finanze in tempo reale</p>
+        <p class="text-gray-400">Monitora le tue finanze in tempo reale</p>
       </div>
      <div class="flex gap-2">
         <RouterLink to="/"
