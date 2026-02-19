@@ -1,4 +1,4 @@
-export interface Category {
+export interface CategoryVO {
     id: string;
     descrizione: string;
     codice: string;

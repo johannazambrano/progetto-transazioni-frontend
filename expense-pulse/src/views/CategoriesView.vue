@@ -1,154 +1,158 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import type { Category } from "@/models/entities/Category";
+import { ref, onMounted, type Component } from "vue";
+import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { useCategoryStore } from "@/stores/categoryStore";
-import { Pencil, Trash2, Plus, X, Wallet } from "lucide-vue-next";
-import { onMounted } from "vue";
 
+// Import dei componenti atomici
+import CategoryTable from "@/components/CategoryTable.vue";
+import CategoryForm from "@/components/CategoryForm.vue";
+import CategoryStats from "@/components/CategoryStats.vue";
+import Header from "@/components/Header.vue";
+import _GridContainer from "@/components/GridContainer.vue";
+
+import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
+import { DEFAULT_LAYOUT_CATEGORIES, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+
+// VARIABILI
 const categoryStore = useCategoryStore();
+const GridContainer = _GridContainer as any;
 
-// stato per il modale di modifica
-const isEditModalOpen = ref(false);
-const editingCategory = ref<Category | null>(null);
+// Mappa dei componenti - chiave: ID componente
+const componentMap: Record<string, Component> = {
+  form: CategoryForm,
+  table: CategoryTable,
+  stats: CategoryStats,
+};
+
+const layout = ref<LayoutItemVO[]>([]);
+
+
+const editMode = ref(false); // Stato per la modalità di modifica del layout
+
+// --- FUNZIONI
+// Funzione per ottenere il componente dalla mappa
+const getComponent = (itemId: string): Component | undefined => {
+  return componentMap[itemId];
+};
 
 onMounted(() => {
+  // Carica il layout salvato
+  layout.value = loadLayout();
+
+  // Carica i dati degli store
   categoryStore.fetchCategories();
 });
 
-const openEditModal = (cat: Category) => {
-  // Cloniamo l'oggetto per non modificare lo store prima del save
-  editingCategory.value = { ...cat };
-  isEditModalOpen.value = true;
-};
-
-const isSaving = ref(false);
-
-const handleUpdate = async () => {
-  if (
-    // 1. Controllo che i dati esistano e siano validi
-    !editingCategory.value ||
-    editingCategory.value.descrizione.trim() === ""
-  ) {
-    return;
-  }
-
+/**
+ * Carica il layout salvato da localStorage
+ * Se non esiste, restituisce il layout di default
+ */
+const loadLayout = (): LayoutItemVO[] => {
   try {
-    // 2. Imposto lo stato di salvataggio
-    isSaving.value = true;
+    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
 
-    // 3. Chiamata allo store per aggiornare la categoria
-    await categoryStore.updateCategory(editingCategory.value);
+    if (savedLayout) {
+      const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
 
-    // 4. Successo: chiudiamo il modale
-    isEditModalOpen.value = false;
-  } catch (error: unknown) {
-    let messaggio = "Errore durante l'aggiornamento";
-    if (error instanceof Error) {
-      // Se è un errore standard, prendiamo il suo messaggio
-      messaggio = error.message;
-    } else if (typeof error === "string") {
-      // Se il server ha mandato solo una scritta, usiamo quella
-      messaggio = error;
+      // Validazione: assicurati che tutti gli elementi richiesti esistano
+      const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
+      const savedIds = parsed.map(item => item.i);
+      const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
+
+      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
+        console.log("[CategoriesView.loadLayout] ✅ Layout caricato da localStorage");
+        return parsed;
+      } else {
+        console.warn("[CategoriesView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
+        return [...DEFAULT_LAYOUT_CATEGORIES];
+      }
     }
-    alert(messaggio);
-  } finally {
-    // 5. Resetto lo stato di salvataggio
-    isSaving.value = false;
+  } catch (error) {
+    console.error("[CategoriesView.loadLayout] ❌ Errore nel caricamento del layout:", error);
+  }
+
+  console.log("[CategoriesView.loadLayout] 📋 Uso layout di default");
+  return [...DEFAULT_LAYOUT_CATEGORIES];
+};
+
+/**
+ * Salva il layout corrente in localStorage
+ */
+const saveLayout = (layoutToSave: LayoutItemVO[]) => {
+  try {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
+    console.log("[CategoriesView.saveLayout] 💾 Layout salvato");
+  } catch (error) {
+    console.error("[CategoriesView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
   }
 };
 
-const confirmDelete = async (cat: Category) => {
-  if (
-    confirm(`Sei sicuro di voler eliminare la categoria "${cat.descrizione}"?`)
-  ) {
-    try {
-      await categoryStore.deleteCategory(cat.id);
-    } catch (error: any) {
-      alert(error.message || "Errore durante l'eliminazione");
-    }
+
+const toggleEditMode = () => {
+  // Se stiamo uscendo dalla modalità edit, salva il layout
+  if (!editMode.value) {
+    saveLayout(layout.value);
+    console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
+
+  editMode.value = !editMode.value;
 };
 
-// Formattazione Euro
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
+/**
+ * Resetta il layout al default
+ */
+const resetLayout = () => {
+  if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
+    layout.value = [...DEFAULT_LAYOUT_CATEGORIES];
+    // saveLayout(layout.value);
+    console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
+  }
 };
 </script>
 
 <template>
-  <main class="max-w-5xl mx-auto p-6">
-    <header class="mb-8 flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Gestione Categorie</h1>
-        <p class="text-gray-500">Personalizza i tuoi budget e colori</p>
-      </div>
+  <main class="mx-auto p-6">
+    <header>
+      <!-- <Header /> -->
     </header>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-50 border-b border-gray-100">
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase">Colore</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase">Codice</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase">Descrizione</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase text-right">Budget</th>
-            <th class="p-4 text-xs font-bold text-gray-400 uppercase text-center">Azioni</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr v-for="cat in categoryStore.categories" :key="cat.id" class="hover:bg-gray-50 transition-colors">
-            <td class="p-4">
-              <div class="w-6 h-6 rounded-full border border-gray-200" :style="{ backgroundColor: cat.colore }"></div>
-            </td>
-            <td class="p-4 font-mono text-sm text-gray-500">{{ cat.codice }}</td>
-            <td class="p-4 font-bold text-gray-800">{{ cat.descrizione }}</td>
-            <td class="p-4 text-right font-semibold text-indigo-600">{{ formatCurrency(cat.budget) }}</td>
-            <td class="p-4">
-              <div class="flex justify-center gap-2">
-                <button @click="openEditModal(cat)" class="p-2 text-gray-400 hover:text-amber-500 transition-colors">
-                  <Pencil :size="18" />
-                </button>
-                <button @click="confirmDelete(cat)" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                  <Trash2 :size="18" />
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="flex justify-end mr-3 mb-4">
+      <button v-if="editMode" @click="resetLayout"
+        class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all bg-red-400 border border-gray-200 text-white hover:border-red-400 hover:bg-red-600 hover:shadow-sm"
+        title="Ripristina layout predefinito">
+        <RotateCcw :size="18" class="mr-2" />
+        <span>Reset</span>
+      </button>
+      <button @click="toggleEditMode" :class="[
+        'flex items-center px-2 py-2 rounded-xl text-sm font-medium transition-all',
+        !editMode
+          ? 'bg-indigo-600 text-white shadow-md hover:bg-indigo-700'
+          : 'bg-green-400 border border-gray-200 text-white hover:border-green-600 hover:bg-green-600 hover:text-white hover:shadow-sm',
+      ]">
+        <Lock v-if="editMode" :size="18" class="mr-2" />
+        <Edit3 v-else :size="18" class="mr-2" />
+        <span>{{ editMode ? "Blocca Layout" : "Modifica Layout" }}</span>
+      </button>
     </div>
-
-    <div v-if="isEditModalOpen" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-gray-900">Modifica Categoria</h3>
-          <button @click="isEditModalOpen = false" class="text-gray-400 hover:text-gray-600"><X :size="24" /></button>
-        </div>
-
-        <div v-if="editingCategory" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Descrizione</label>
-            <input v-model="editingCategory.descrizione" type="text" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Budget</label>
-              <input v-model.number="editingCategory.budget" type="number" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Colore</label>
-              <input v-model="editingCategory.colore" type="color" class="w-full h-12 p-1 bg-white border border-gray-200 rounded-xl cursor-pointer" />
-            </div>
-          </div>
-          <div class="pt-4 flex gap-3">
-            <button @click="isEditModalOpen = false" class="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50">Annulla</button>
-            <button @click="handleUpdate" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Salva</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <GridContainer v-model:layout="layout" :is-editable="editMode">
+      <template #default="{ item }: any">
+        <component v-if="item && item.i" :is="getComponent(item.i)"
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
+      </template>
+    </GridContainer>
   </main>
 </template>
+<style scoped>
+/* Placeholder durante il drag */
+:deep(.vue-grid-item.vue-grid-placeholder) {
+  background: #e0e7ff;
+  opacity: 0.3;
+  border-radius: 8px;
+  border: 2px dashed #6366f1;
+}
+
+:deep(.vue-grid-item.resizing) {
+  opacity: 0.9;
+  z-index: 3;
+}
+</style>

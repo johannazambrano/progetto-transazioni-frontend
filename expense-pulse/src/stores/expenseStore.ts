@@ -1,86 +1,97 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
-import type { Transaction, Pagination } from "@/models/entities/Transaction";
-import type { TransactionDTO } from "@/models/dtos/TransactionDTO";
-import { useCategoryStore } from "./categoryStore";
+import type { TransactionVO } from "@/models/vo/TransactionVO";
 import { TransactionMapper } from "@/models/mappers/TransactionMapper";
-import type {
-  TransactionResponseDTO,
-  FiltroRicercaTransactionDTO,
-} from "@/models/dtos/TransactionDTO";
-import type { FiltroTransactionDTO } from "@/models/dtos/FiltroTransactionDTO";
-import type { PaginazioneDTO } from "@/models/dtos/PaginazioneDTO";
+import type { TransactionResponseDTO } from "@/models/dtos/TransactionResponseDTO";
+import type { FiltroRicercaTransactionDTO } from "@/models/dtos/FiltroRicercaTransactionDTO";
+import type { PaginationVO } from "@/models/vo/PaginationVO";
 
 export const useExpenseStore = defineStore("expense", () => {
   // STATO
   console.log("[useExpenseStore] entriamo dentro useExpenseStore");
 
-  const transactions = ref<Transaction[]>([]);
-  const pagination = ref<Pagination | null>(null);
+  const transactions = ref<TransactionVO[]>([]);
+  const pagination = ref<PaginationVO | null>(null);
   const loading = ref(false); // Utile per mostrare uno spinner
+  const transactionToEdit = ref<TransactionVO | null>(null);
+
 
   // GETTERS: calcoli automatici (reattivi)
   const totalBalance = computed(() =>
-    transactions.value.reduce((acc, t) => acc + t.amount, 0)
+    transactions.value.reduce((acc, t) => acc + t.amount, 0),
   );
 
   const totalIncomes = computed(() =>
     transactions.value
       .filter((t) => t.amount > 0)
-      .reduce((acc, t) => acc + t.amount, 0)
+      .reduce((acc, t) => acc + t.amount, 0),
   );
 
   const totalExpenses = computed(() =>
     transactions.value
       .filter((t) => t.amount < 0)
-      .reduce((acc, t) => acc + t.amount, 0)
+      .reduce((acc, t) => acc + t.amount, 0),
   );
+
+  // AZIONI
+  const startEdit = (transaction: TransactionVO) => {
+    transactionToEdit.value = transaction;
+    // Scrolla la pagina verso l'alto per mostrare il form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    transactionToEdit.value = null;
+  };
 
   // Azioni asincrone
   const fetchTransactions = async (
-  filters: Partial<FiltroRicercaTransactionDTO> = {}
-) => {
-  loading.value = true;
-  try {
-    // Creiamo il payload dinamicamente
-    const payload: FiltroRicercaTransactionDTO = {
-      // Invia il titolo solo se non è una stringa vuota, altrimenti undefined
-      title: filters.title?.trim() || undefined,
-      
-      // Fondamentale: invia la categoria solo se non è "" (Tutte le categorie)
-      category: filters.category && filters.category !== "" ? filters.category : undefined,
+    filters: Partial<FiltroRicercaTransactionDTO> = {},
+  ) => {
+    loading.value = true;
+    try {
+      // Creiamo il payload dinamicamente
+      const payload: FiltroRicercaTransactionDTO = {
+        // Invia il titolo solo se non è una stringa vuota, altrimenti undefined
+        title: filters.title?.trim() || undefined,
 
-      startDate: filters.startDate || undefined,
-      endDate: filters.endDate || undefined,
-      
-      paginazione: {
-        numeroPagina: filters.paginazione?.numeroPagina || 0,
-        numeroElementiPerPagina: 10,
-      },
-    };
+        // Fondamentale: invia la categoria solo se non è "" (Tutte le categorie)
+        category:
+          filters.category && filters.category !== ""
+            ? filters.category
+            : undefined,
 
-    console.log("[expenseStore] Inviando payload ricerca:", payload);
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
 
-    const response = await api.post<TransactionResponseDTO>(
-      "/transactions/ricerca",
-      payload
-    );
+        paginazione: {
+          numeroPagina: filters.paginazione?.numeroPagina || 0,
+          numeroElementiPerPagina: 10,
+        },
+      };
 
-    const mapped = TransactionMapper.toResponseState(response.data);
-    transactions.value = mapped.transactions;
-    pagination.value = mapped.pagination;
-  } catch (error) {
-    console.error("Errore nella ricerca transazioni: ", error);
-  } finally {
-    loading.value = false;
-  }
-};
+      console.log("[expenseStore.fetchTransactions] Inviando payload ricerca:", payload);
 
-  const addTransaction = async (transactionData: Omit<Transaction, "id">) => {
+      const response = await api.post<TransactionResponseDTO>(
+        "/transactions/ricerca",
+        payload,
+      );
+
+      const mapped = TransactionMapper.toResponseState(response.data);
+      transactions.value = mapped.transactions;
+      pagination.value = mapped.pagination;
+    } catch (error) {
+      console.error("[expenseStore.fetchTransactions] ❌ Errore nella ricerca transazioni: ", error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const addTransaction = async (transactionData: Omit<TransactionVO, "id">) => {
     try {
       // 1. Creiamo un'entità temporanea (id vuoto per la creazione)
-      const newEntity: Transaction = {
+      const newEntity: TransactionVO = {
         ...transactionData,
         id: "",
       };
@@ -95,7 +106,8 @@ export const useExpenseStore = defineStore("expense", () => {
       // 4. Refresh della lista
       await fetchTransactions();
     } catch (error) {
-      console.error("Errore add transaction:", error);
+      console.error("[expenseStore.addTransaction] ❌ Errore add transaction:", error);
+      throw error; // Rilanciamo l'errore per gestirlo nel componente
     }
   };
 
@@ -104,44 +116,55 @@ export const useExpenseStore = defineStore("expense", () => {
       await api.delete(`/transactions/${id}`);
       await fetchTransactions();
     } catch (error) {
-      console.error("Errore delete:", error);
+      console.error("[expenseStore.deleteTransaction] ❌ Errore delete:", error);
+      throw error; // Rilanciamo l'errore
     }
   };
 
-  const updateTransaction = async (updatedTransaction: Transaction) => {
+  const updateTransaction = async (updatedTransaction: TransactionVO) => {
     loading.value = true;
     try {
-      // 1. Trasformiamo l'entity in DTO usando il mapper, garantendo così che Category venga inviata come oggetto
+      // 1. Trasformiamo l'entity in DTO usando il mapper
       const dto = TransactionMapper.toDTO(updatedTransaction);
 
       // 2. Eseguiamo la PUT
       await api.put(`/transactions/${updatedTransaction.id}`, dto);
 
-    // 3. Refresh locale o ricaricamento dal server
+      // 3. Refresh
       await fetchTransactions();
 
-      console.log(`[expenseStore] Transazione ${updatedTransaction.id} aggiornata con successo`);
+      // 4. Usciamo dalla modalità modifica
+      cancelEdit();
+
+      console.log(
+        `[expenseStore.updateTransaction] Transazione ${updatedTransaction.id} aggiornata con successo`,
+      );
     } catch (error) {
-      console.error("Errore durante l'aggiornamento della transazione: ", error);
-      throw error;
+      console.error(
+        "[expenseStore.updateTransaction] ❌ Errore durante l'aggiornamento della transazione: ",
+        error,
+      );
+      throw error; // Rilanciamo
     } finally {
-        loading.value = false;
+      loading.value = false;
     }
   };
 
   const changePage = async (pageNumber: number) => {
-  // Chiamiamo fetchTransactions passando il numero della pagina desiderata
-  await fetchTransactions({
-    paginazione: {
-      numeroPagina: pageNumber,
-      numeroElementiPerPagina: 10 // O il valore che preferisci
-    }
-  });
-};
+    // Chiamiamo fetchTransactions passando il numero della pagina desiderata
+    await fetchTransactions({
+      paginazione: {
+        numeroPagina: pageNumber,
+        numeroElementiPerPagina: 10, // O il valore che preferisci
+      },
+    });
+  };
 
   return {
     transactions,
     pagination,
+    loading,
+    transactionToEdit,
     totalBalance,
     totalIncomes,
     totalExpenses,
@@ -150,5 +173,7 @@ export const useExpenseStore = defineStore("expense", () => {
     deleteTransaction,
     updateTransaction,
     changePage,
+    startEdit,
+    cancelEdit,
   };
 });

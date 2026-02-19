@@ -1,8 +1,8 @@
 import type { CategoryDTO } from '../dtos/CategoryDTO';
-import type { Category } from '../entities/Category';
+import type { CategoryVO } from '../vo/CategoryVO';
 
 export class CategoryMapper {
-    static toEntity(dto: CategoryDTO): Category {
+    static toEntity(dto: CategoryDTO): CategoryVO {
         return {
             id: dto.id || '',
             descrizione: dto.descrizione,
@@ -12,7 +12,7 @@ export class CategoryMapper {
         }
     }
 
-    static toDTO(entity: Category): CategoryDTO {
+    static toDTO(entity: CategoryVO): CategoryDTO {
         const dto: CategoryDTO = {
             descrizione: entity.descrizione,
             codice: entity.codice,

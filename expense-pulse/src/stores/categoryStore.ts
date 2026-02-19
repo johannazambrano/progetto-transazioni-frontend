@@ -2,19 +2,19 @@ import api from "@/services/api";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { CategoryMapper } from "@/models/mappers/CategoryMapper";
-import type { CategoryResponseDTO } from "@/models/dtos/CategoryDTO";
-import type { Category } from "@/models/entities/Category";
+import type { CategoryResponseDTO } from "@/models/dtos/CategoryResponseDTO";
+import type { CategoryVO } from "@/models/vo/CategoryVO";
 
 export const useCategoryStore = defineStore("category", () => {
-  console.log("Entriamo dentro useCategoryStore");
+  console.log("[categoryStore] Entriamo dentro useCategoryStore");
 
   //const categories = ref<Category[]>([]);
-  const categories = ref<Category[]>([]);
+  const categories = ref<CategoryVO[]>([]);
   const loading = ref(false);
 
   // Calcola il prossimo codice incrementando l'ultimo (es: "002" -> "003")
   const nextAvailableCode = computed(() => {
-    console.log("category lunghezza: ", categories.value.length);
+    console.log("[categoryStore.nextAvailableCode] 🔍 category lunghezza: ", categories.value.length);
     if (categories.value.length === 0) return "001";
 
     const codes = categories.value
@@ -27,12 +27,10 @@ export const useCategoryStore = defineStore("category", () => {
   const fetchCategories = async () => {
     loading.value = true;
     try {
-      console.log("Entriamo in fetchCategories");
       const response = await api.get<CategoryResponseDTO>("/categories");
       categories.value = response.data.categories.map(CategoryMapper.toEntity);
-      console.log("Riceve la risposta del fetchCategory");
     } catch (error) {
-      console.error("Errore nel caricamento categorie:", error);
+      console.error("[categoryStore.fetchCategories] ❌ Errore nel caricamento categorie:", error);
     } finally {
       loading.value = false;
     }
@@ -59,7 +57,7 @@ export const useCategoryStore = defineStore("category", () => {
       const code = nextAvailableCode.value;
 
       // 3. Creiamo l'entity
-      const newEntity: Category = {
+      const newEntity: CategoryVO = {
         id: "",
         descrizione: catData.descrizione,
         codice: code,
@@ -76,12 +74,12 @@ export const useCategoryStore = defineStore("category", () => {
       // 5. Refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante l'aggiunta:", error);
+      console.error("[categoryStore.addCategory] ❌ Errore durante l'aggiunta:", error);
       throw error;
     }
   };
 
-  const updateCategory = async (cat: Category) => {
+  const updateCategory = async (cat: CategoryVO) => {
     // Implementa la logica di aggiornamento categoria
     try {
       // convertiamo l'entity in dto
@@ -92,7 +90,7 @@ export const useCategoryStore = defineStore("category", () => {
       // refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante la modifica della categoria:", error);
+      console.error("[categoryStore.updateCategory] ❌ Errore durante la modifica della categoria:", error);
       throw error;
     }
   };
@@ -105,7 +103,7 @@ export const useCategoryStore = defineStore("category", () => {
       // refresh della lista
       await fetchCategories();
     } catch (error) {
-      console.error("Errore durante l'eliminazione della categoria:", error);
+      console.error("[categoryStore.deleteCategory] ❌ Errore durante l'eliminazione della categoria:", error);
     }
   };
 
