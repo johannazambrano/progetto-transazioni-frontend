@@ -13,7 +13,7 @@ export class LayoutMapper {
     return {
       id: dto.id,
       layoutName: dto.layoutName,
-      layout: LayoutItemMapper.toVOList(dto.layout || []),
+      layoutItems: LayoutItemMapper.toVOList(dto.layoutItems || []),
       isDefault: dto.isDefault ?? false,
     };
   }
@@ -25,7 +25,7 @@ export class LayoutMapper {
     return {
       id: vo.id,
       layoutName: vo.layoutName,
-      layout: LayoutItemMapper.toDTOList(vo.layout || []),
+      layoutItems: LayoutItemMapper.toDTOList(vo.layoutItems || []),
       isDefault: vo.isDefault,
     };
   }

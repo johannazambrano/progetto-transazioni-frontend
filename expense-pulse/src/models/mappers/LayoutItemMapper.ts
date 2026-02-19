@@ -8,7 +8,7 @@ export class LayoutItemMapper {
   /**
    * Converte da DTO a VO
    */
-  static toVO(dto: LayoutItemDTO): LayoutItemVO {
+  static toVO(dto: any): LayoutItemVO {
     return {
       i: dto.i,
       x: dto.x,
@@ -19,14 +19,14 @@ export class LayoutItemMapper {
       maxW: dto.maxW,
       minH: dto.minH,
       maxH: dto.maxH,
-      static: dto.static ?? false,
+      static: dto.staticLayout ?? dto.static ?? false,
     };
   }
 
   /**
    * Converte da VO a DTO
    */
-  static toDTO(vo: LayoutItemVO): LayoutItemDTO {
+  static toDTO(vo: LayoutItemVO): any {
     return {
       i: vo.i,
       x: vo.x,
@@ -37,7 +37,7 @@ export class LayoutItemMapper {
       maxW: vo.maxW,
       minH: vo.minH,
       maxH: vo.maxH,
-      static: vo.static,
+      staticLayout: vo.static,
     };
   }
 

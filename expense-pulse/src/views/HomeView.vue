@@ -53,7 +53,7 @@ onMounted(async () => {
     await layoutStore.fetchLayout('default');
 
     // Carica i dati degli store
-    store.fetchTransactions();
+    await store.fetchTransactions();
     await categoryStore.fetchCategories();
   } catch (error) {
     console.error("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);

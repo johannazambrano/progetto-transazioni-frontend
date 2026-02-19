@@ -19,9 +19,9 @@ export const useLayoutStore = defineStore('layout', () => {
 
   // --- GETTERS (computed) ---
   const hasLayout = computed(() => currentLayout.value !== null);
-  const layoutItems = computed(() => currentLayout.value?.layout || []);
+  const layoutItems = computed(() => currentLayout.value?.layoutItems || []);
 
-  
+
   /**
  * Crea un layout VO dalle costanti di default
  */
@@ -29,7 +29,7 @@ export const useLayoutStore = defineStore('layout', () => {
     return {
       id: undefined,
       layoutName: 'default',
-      layout: [...DEFAULT_LAYOUT_HOME],
+      layoutItems: [...DEFAULT_LAYOUT_HOME],
       isDefault: true,
     };
   };
@@ -39,7 +39,7 @@ export const useLayoutStore = defineStore('layout', () => {
    */
   const hasComponent = computed(() => (componentId: string) => {
     if (!currentLayout.value) return false;
-    return currentLayout.value.layout.some(item => item.i === componentId);
+    return currentLayout.value.layoutItems.some(item => item.i === componentId);
   });
 
   // --- HELPER FUNCTIONS ---
@@ -51,14 +51,14 @@ export const useLayoutStore = defineStore('layout', () => {
     if (!currentLayout.value) return { x: 0, y: 0 };
 
     const GRID_COLS = 12;
-    const items = currentLayout.value.layout;
-    
+    const items = currentLayout.value.layoutItems;
+
     let maxY = 0;
     items.forEach(item => {
       const itemBottom = item.y + item.h;
       if (itemBottom > maxY) maxY = itemBottom;
     });
-    
+
     for (let y = 0; y <= maxY + 5; y++) {
       for (let x = 0; x <= GRID_COLS - width; x++) {
         if (isPositionAvailable(x, y, width, height, items)) {
@@ -66,15 +66,15 @@ export const useLayoutStore = defineStore('layout', () => {
         }
       }
     }
-    
+
     return { x: 0, y: maxY + 1 };
   };
 
   const isPositionAvailable = (
-    x: number, 
-    y: number, 
-    w: number, 
-    h: number, 
+    x: number,
+    y: number,
+    w: number,
+    h: number,
     items: LayoutItemVO[]
   ): boolean => {
     return !items.some(item => {
@@ -107,10 +107,21 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     try {
-      const response = await api.get<LayoutDTO>('/layouts', {
-        params: { name: layoutName },
-      });
-      currentLayout.value = LayoutMapper.toVO(response.data);
+      let response;
+      if (layoutName === 'default') {
+        // Usa l'endpoint specifico per il layout di default
+        response = await api.get<LayoutDTO>('/layouts/default');
+        currentLayout.value = LayoutMapper.toVO(response.data);
+      } else {
+        // Altrimenti prova a cercarlo nella lista (il BE attualmente non filtra per nome via query param)
+        const listResponse = await api.get<LayoutDTO[]>('/layouts');
+        const found = listResponse.data.find(l => l.layoutName === layoutName);
+        if (found) {
+          currentLayout.value = LayoutMapper.toVO(found);
+        } else {
+          throw new Error(`Layout "${layoutName}" non trovato`);
+        }
+      }
       console.log('[layoutStore.fetchLayout] ✅ Layout caricato:', layoutName);
     } catch (e) {
       console.error('[layoutStore.fetchLayout] ❌ Errore nel caricamento del layout dal backend:', e);
@@ -153,7 +164,7 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     // Validazione base
-    if (!currentLayout.value.layoutName || currentLayout.value.layout.length === 0) {
+    if (!currentLayout.value.layoutName || currentLayout.value.layoutItems.length === 0) {
       error.value = 'Layout non valido';
       return;
     }
@@ -163,9 +174,17 @@ export const useLayoutStore = defineStore('layout', () => {
 
     try {
       const dto = LayoutMapper.toDTO(currentLayout.value);
-      const response = await api.post<LayoutDTO>('/layouts', dto);
-      currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('[layoutStore.saveLayout] 💾 Layout salvato');
+
+      if (currentLayout.value.id) {
+        // Se ha un ID, facciamo un aggiornamento (PUT)
+        await api.put(`/layouts/${currentLayout.value.id}`, dto);
+        console.log('[layoutStore.saveLayout] 🔄 Layout aggiornato via PUT');
+      } else {
+        // Altrimenti creazione (POST)
+        const response = await api.post<LayoutDTO>('/layouts', dto);
+        currentLayout.value = LayoutMapper.toVO(response.data);
+        console.log('[layoutStore.saveLayout] 💾 Layout creato via POST');
+      }
     } catch (e) {
       console.error('[layoutStore.saveLayout] ❌ Errore nel salvataggio del layout:', e);
       error.value = 'Impossibile salvare il layout';
@@ -215,15 +234,15 @@ export const useLayoutStore = defineStore('layout', () => {
 
     try {
       await api.delete(`/layouts/${layoutName}`);
-      
+
       // Rimuovi dalla lista locale
       allLayouts.value = allLayouts.value.filter(l => l.layoutName !== layoutName);
-      
+
       // Se era quello corrente, carica il default
       if (currentLayout.value?.layoutName === layoutName) {
         await fetchLayout('default');
       }
-      
+
       console.log('[layoutStore.deleteLayout] 🗑️ Layout eliminato:', layoutName);
     } catch (e) {
       console.error('[layoutStore.deleteLayout] ❌ Errore nell\'eliminazione del layout:', e);
@@ -253,7 +272,7 @@ export const useLayoutStore = defineStore('layout', () => {
       console.log('[layoutStore.resetLayout] 🔄 Layout resettato');
     } catch (e) {
       console.error('[layoutStore.resetLayout] ❌ Errore nel reset del layout:', e);
-    
+
       console.warn('[layoutStore.resetLayout] 🔄 Reset con fallback alle costanti');
       currentLayout.value = createDefaultLayoutVO();
       isUsingFallback.value = true;
@@ -283,14 +302,14 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     // Verifica duplicato (come fai con le categorie)
-    if (currentLayout.value.layout.some(item => item.i === componentId)) {
+    if (currentLayout.value.layoutItems.some(item => item.i === componentId)) {
       error.value = `Il componente "${componentId}" è già presente nel layout`;
       return null;
     }
 
     try {
       const position = findAvailablePosition(config.w, config.h);
-      
+
       const newItem: LayoutItemVO = {
         i: componentId,
         x: position.x,
@@ -303,8 +322,8 @@ export const useLayoutStore = defineStore('layout', () => {
         maxH: config.maxH,
         static: false,
       };
-      
-      currentLayout.value.layout.push(newItem);
+
+      currentLayout.value.layoutItems.push(newItem);
       console.log('[layoutStore.addComponent] ➕ Componente aggiunto:', componentId);
       return newItem;
     } catch (e) {
@@ -324,9 +343,9 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     try {
-      const index = currentLayout.value.layout.findIndex(item => item.i === componentId);
+      const index = currentLayout.value.layoutItems.findIndex(item => item.i === componentId);
       if (index !== -1) {
-        currentLayout.value.layout.splice(index, 1);
+        currentLayout.value.layoutItems.splice(index, 1);
         console.log('[layoutStore.removeComponent] ➖ Componente rimosso:', componentId);
         return true;
       }
@@ -347,7 +366,7 @@ export const useLayoutStore = defineStore('layout', () => {
       return;
     }
 
-    currentLayout.value.layout = items;
+    currentLayout.value.layoutItems = items;
     console.log('[layoutStore.updateLayoutItems] 🔄 Layout items aggiornati');
   };
 
