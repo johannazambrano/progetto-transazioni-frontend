@@ -5,7 +5,8 @@ import { LayoutMapper } from '@/models/mappers/LayoutMapper';
 import type { LayoutDTO } from '@/models/dtos/LayoutDTO';
 import type { LayoutVO } from '@/models/vo/LayoutVO';
 import type { LayoutItemVO } from '@/models/vo/LayoutItemVO';
-import { DEFAULT_LAYOUT_HOME, USE_BACKEND_LAYOUTS } from '@/constants/app.constants';
+import { DEFAULT_LAYOUT_HOME, DEFAULT_LAYOUT_CATEGORIES, USE_BACKEND_LAYOUTS } from '@/constants/app.constants';
+import type { FiltroLayoutDTO } from '@/models/dtos/FiltroLayoutDTO';
 
 
 export const useLayoutStore = defineStore('layout', () => {
@@ -14,25 +15,30 @@ export const useLayoutStore = defineStore('layout', () => {
   const allLayouts = ref<LayoutVO[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const isUsingFallback = ref(false); // 
+  const isUsingFallback = ref(false);
 
 
   // --- GETTERS (computed) ---
   const hasLayout = computed(() => currentLayout.value !== null);
   const layoutItems = computed(() => currentLayout.value?.layoutItems || []);
 
-
   /**
  * Crea un layout VO dalle costanti di default
  */
-  const createDefaultLayoutVO = (): LayoutVO => {
-    return {
-      id: undefined,
-      layoutName: 'default',
-      layoutItems: [...DEFAULT_LAYOUT_HOME],
-      isDefault: true,
-    };
-  };
+  // const createDefaultLayoutVO = (layoutName: string = 'default'): LayoutVO => {
+  //   let items = DEFAULT_LAYOUT_HOME;
+
+  //   if (layoutName === 'DEFAULT_LAYOUT_CATEGORIES' || layoutName === 'CategoriesView') {
+  //     items = DEFAULT_LAYOUT_CATEGORIES;
+  //   }
+
+  //   return {
+  //     id: undefined,
+  //     layoutName: layoutName,
+  //     layoutItems: [...items],
+  //     isDefault: true,
+  //   };
+  // };
 
   /**
    * Verifica se un componente è presente nel layout
@@ -92,14 +98,18 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Carica il layout dell'utente
    */
-  const fetchLayout = async (layoutName: string = 'default') => {
+  const fetchLayout = async (layoutName: string, isDefault: boolean = false) => {
+    const filtroLayoutDto: FiltroLayoutDTO = {
+      layoutName: layoutName,
+      isDefault: isDefault
+    }
     loading.value = true;
     error.value = null;
     isUsingFallback.value = false;
 
     if (!USE_BACKEND_LAYOUTS) {
       console.warn('[layoutStore.fetchLayout] ⚠️ Backend layouts disabilitato, uso layout dalle costanti');
-      currentLayout.value = createDefaultLayoutVO();
+      // currentLayout.value = createDefaultLayoutVO(layoutName);
       isUsingFallback.value = true;
       loading.value = false;
       console.log('[layoutStore.fetchLayout] 🔍 USE_BACKEND_LAYOUTS:', USE_BACKEND_LAYOUTS);
@@ -108,27 +118,26 @@ export const useLayoutStore = defineStore('layout', () => {
 
     try {
       let response;
-      if (layoutName === 'default') {
-        // Usa l'endpoint specifico per il layout di default
-        response = await api.get<LayoutDTO>('/layouts/default');
-        currentLayout.value = LayoutMapper.toVO(response.data);
-      } else {
-        // Altrimenti prova a cercarlo nella lista (il BE attualmente non filtra per nome via query param)
-        const listResponse = await api.get<LayoutDTO[]>('/layouts');
-        const found = listResponse.data.find(l => l.layoutName === layoutName);
-        if (found) {
-          currentLayout.value = LayoutMapper.toVO(found);
-        } else {
-          throw new Error(`Layout "${layoutName}" non trovato`);
-        }
+      // Usa l'endpoint specifico per il layout di default
+      response = await api.post<LayoutDTO>('/layouts/default', filtroLayoutDto);
+
+      if (!response.data || (typeof response.data === 'object' && Object.keys(response.data).length === 0)) {
+        throw new Error(`Layout "${layoutName}" non trovato`);
       }
-      console.log('[layoutStore.fetchLayout] ✅ Layout caricato:', layoutName);
+
+      currentLayout.value = LayoutMapper.toVO(response.data);
+      console.log('[layoutStore.fetchLayout] ✅ Layout caricato dal backend:', layoutName);
     } catch (e) {
       console.error('[layoutStore.fetchLayout] ❌ Errore nel caricamento del layout dal backend:', e);
-      console.warn('[layoutStore.fetchLayout] 🔄 Uso layout di fallback dalle costanti');
-      currentLayout.value = createDefaultLayoutVO();
-      isUsingFallback.value = true;
-      error.value = 'Backend non disponibile, uso layout locale';
+      if (isDefault) {
+        console.warn(`[layoutStore.fetchLayout] 🔄 Fallback definitivo a costanti locali per: ${layoutName}`);
+        // currentLayout.value = createDefaultLayoutVO(layoutName);
+        isUsingFallback.value = true;
+        error.value = 'Backend non disponibile, uso layout locale';
+      } else {
+        // Rilancia l'errore per permettere al chiamante (es. CategoriesView) di gestire il retry
+        throw e;
+      }
     } finally {
       loading.value = false;
     }
@@ -156,7 +165,7 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Salva il layout corrente
    */
-  const saveLayout = async () => {
+  const saveLayout = async (layoutData: LayoutVO) => {
     console.log('[layoutStore.saveLayout] saveLayout', currentLayout.value);
     if (!currentLayout.value) {
       error.value = 'Nessun layout da salvare';
@@ -175,7 +184,7 @@ export const useLayoutStore = defineStore('layout', () => {
     try {
       const dto = LayoutMapper.toDTO(currentLayout.value);
 
-      if (currentLayout.value.id) {
+      if (currentLayout.value.id && !currentLayout.value.isDefault) {
         // Se ha un ID, facciamo un aggiornamento (PUT)
         await api.put(`/layouts/${currentLayout.value.id}`, dto);
         console.log('[layoutStore.saveLayout] 🔄 Layout aggiornato via PUT');
@@ -240,7 +249,7 @@ export const useLayoutStore = defineStore('layout', () => {
 
       // Se era quello corrente, carica il default
       if (currentLayout.value?.layoutName === layoutName) {
-        await fetchLayout('default');
+        await fetchLayout(layoutName);
       }
 
       console.log('[layoutStore.deleteLayout] 🗑️ Layout eliminato:', layoutName);
@@ -261,20 +270,25 @@ export const useLayoutStore = defineStore('layout', () => {
 
     if (!USE_BACKEND_LAYOUTS || isUsingFallback.value) {
       console.warn('🔄 Reset al layout dalle costanti');
-      currentLayout.value = createDefaultLayoutVO();
+      // currentLayout.value = createDefaultLayoutVO();
       loading.value = false;
       return;
     }
 
+    const filtroLayoutDto: FiltroLayoutDTO = {
+      layoutName: currentLayout.value?.layoutName || 'default',
+      isDefault: true
+    }
+
     try {
-      const response = await api.post<LayoutDTO>('/layouts/reset');
+      const response = await api.post<LayoutDTO>('/layouts/reset', filtroLayoutDto);
       currentLayout.value = LayoutMapper.toVO(response.data);
       console.log('[layoutStore.resetLayout] 🔄 Layout resettato');
     } catch (e) {
       console.error('[layoutStore.resetLayout] ❌ Errore nel reset del layout:', e);
 
       console.warn('[layoutStore.resetLayout] 🔄 Reset con fallback alle costanti');
-      currentLayout.value = createDefaultLayoutVO();
+      // currentLayout.value = createDefaultLayoutVO();
       isUsingFallback.value = true;
       error.value = 'Backend non disponibile, layout resettato localmente';
     } finally {

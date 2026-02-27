@@ -10,13 +10,18 @@ const props = defineProps({
   rowHeight: { type: Number, default: 30 }
 });
 
-const emit = defineEmits(['update:layout']);
+const emit = defineEmits(['update:layout', 'layout-changed']);
 
 // Sincronizzazione bidirezionale del layout (Best Practice Vue 3)
 const internalLayout = computed({
   get: () => props.layout,
   set: (val) => emit('update:layout', val)
 });
+
+const onLayoutUpdated = (newLayout) => {
+  // Emettiamo un evento specifico per il monitoraggio
+  emit('layout-changed', newLayout);
+};
 </script>
 
 <template>
@@ -29,6 +34,7 @@ const internalLayout = computed({
     :vertical-compact="true"
     :margin="[10, 10]"
     :use-css-transforms="true"
+    @layout-updated="onLayoutUpdated"
   >
     <grid-item
       v-for="item in internalLayout"

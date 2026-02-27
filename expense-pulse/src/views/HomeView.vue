@@ -9,11 +9,12 @@ import TimeChart from "@/components/TimeChart.vue";
 import TransactionForm from "@/components/TransactionForm.vue";
 import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
-import Header from "@/components/Header.vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
-import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import { DEFAULT_LAYOUT_HOME } from "@/constants/app.constants";
 import _GridContainer from "@/components/GridContainer.vue";
 import { useLayoutStore } from "@/stores/layoutStore";
+
+const componentName = "HomeView";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -49,15 +50,15 @@ const getComponent = (itemId: string): Component | undefined => {
 
 onMounted(async () => {
   try {
-    // Carica il layout dal backend
-    await layoutStore.fetchLayout('default');
-
+    // Carica il layout dal backend specificando che è quello di default
+    await layoutStore.fetchLayout(componentName, false);    
+  } catch (error) {
+    console.error("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);
+    await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
+  }
     // Carica i dati degli store
     await store.fetchTransactions();
     await categoryStore.fetchCategories();
-  } catch (error) {
-    console.error("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);
-  }
 
 
   // Scroll to top
@@ -73,45 +74,45 @@ window.scrollTo({ top: 0, behavior: "smooth" });
  * Carica il layout salvato da localStorage
  * Se non esiste, restituisce il layout di default
  */
-const loadLayout = (): LayoutItemVO[] => {
-  try {
-    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+// const loadLayout = (): LayoutItemVO[] => {
+//   try {
+//     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
 
-    if (savedLayout) {
-      const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
+//     if (savedLayout) {
+//       const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
 
-      // Validazione: assicurati che tutti gli elementi richiesti esistano
-      const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
-      const savedIds = parsed.map(item => item.i);
-      const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
+//       // Validazione: assicurati che tutti gli elementi richiesti esistano
+//       const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
+//       const savedIds = parsed.map(item => item.i);
+//       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
 
-      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
-        console.log("[HomeView.loadLayout] ✅ Layout caricato da localStorage");
-        return parsed;
-      } else {
-        console.warn("[HomeView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
-        return [...DEFAULT_LAYOUT_HOME];
-      }
-    }
-  } catch (error) {
-    console.error("[HomeView.loadLayout] ❌ Errore nel caricamento del layout:", error);
-  }
+//       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
+//         console.log("[HomeView.loadLayout] ✅ Layout caricato da localStorage");
+//         return parsed;
+//       } else {
+//         console.warn("[HomeView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
+//         return [...DEFAULT_LAYOUT_HOME];
+//       }
+//     }
+//   } catch (error) {
+//     console.error("[HomeView.loadLayout] ❌ Errore nel caricamento del layout:", error);
+//   }
 
-  console.log("[HomeView.loadLayout] 📋 Uso layout di default");
-  return [...DEFAULT_LAYOUT_HOME];
-};
+//   console.log("[HomeView.loadLayout] 📋 Uso layout di default");
+//   return [...DEFAULT_LAYOUT_HOME];
+// };
 
 /**
  * Salva il layout corrente in localStorage
  */
-const saveLayout = (layoutToSave: LayoutItemVO[]) => {
-  try {
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-    console.log("[HomeView.saveLayout] 💾 Layout salvato");
-  } catch (error) {
-    console.error("[HomeView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
-  }
-};
+// const saveLayout = (layoutToSave: LayoutItemVO[]) => {
+//   try {
+//     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
+//     console.log("[HomeView.saveLayout] 💾 Layout salvato");
+//   } catch (error) {
+//     console.error("[HomeView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
+//   }
+// };
 
 /**
  * Resetta il layout al default
@@ -131,24 +132,58 @@ const resetLayout = async () => {
  * Handler per l'evento di aggiornamento del layout
  * Viene chiamato quando l'utente trascina o ridimensiona un elemento
  */
-const handleLayoutUpdated = async (newLayout: LayoutItemVO[]) => {
+// const handleLayoutUpdated = async (newLayout: LayoutItemVO[]) => {
 
-  layoutStore.updateLayoutItems(newLayout);
+//   layoutStore.updateLayoutItems(newLayout);
 
-  // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
-  if (!editMode.value) {
-    await layoutStore.saveLayout();
-  }
-};
+//   // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
+//   if (!editMode.value) {
+//     await layoutStore.saveLayout();
+//   }
+// };
 
 const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit (quindi editMode è true), salva il layout
-  if (editMode.value) {
-    await layoutStore.saveLayout();
+  if (editMode.value && !layoutStore.currentLayout?.isDefault && layoutStore.currentLayout !== null) {
+    await layoutStore.saveLayout(layoutStore.currentLayout);
     console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
 
   editMode.value = !editMode.value;
+};
+
+const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
+  if (!layoutStore.currentLayout) return;
+
+  // Se è il layout di default, dobbiamo creare un "clone" personalizzato
+  if (layoutStore.currentLayout.isDefault) {
+
+    layoutStore.currentLayout = {
+      ...layoutStore.currentLayout,
+      id: undefined, // Il backend genererà il nuovo ID
+      layoutName: componentName,
+      isDefault: false,
+      layoutItems: [...newItems] // Nuove posizioni
+    };
+
+    console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+
+    // const newLayoutRequest = {
+    //   name: componentName, // "HomeView" o "CategoriesView"
+    //   isDefault: false,
+    //   layoutItems: newItems,
+    //   // ... altri campi necessari al tuo DTO
+    // };
+
+    console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
+
+    // Chiamata allo store per il POST
+    // await layoutStore.saveNewLayout(newLayoutRequest);
+  } else {
+    // Se non è default, aggiorni semplicemente quello esistente
+    // layoutStore.updateLayoutItems(newItems);
+    // Opzionale: chiamata PUT automatica o salvataggio al "Lock"
+  }
 };
 </script>
 
@@ -156,10 +191,8 @@ const toggleEditMode = async () => {
   <main class="mx-auto p-6">
     <header>
       <!-- <Header /> -->
-      <div 
-        v-if="layoutStore.isUsingFallback" 
-        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm"
-      >
+      <div v-if="layoutStore.isUsingFallback"
+        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
         ⚠️ Modalità sviluppo: usando layout locale
       </div>
     </header>
@@ -182,8 +215,11 @@ const toggleEditMode = async () => {
         <span>{{ editMode ? 'Salva & Blocca' : 'Modifica Layout' }}</span>
       </button>
     </div>
-    
-    <GridContainer v-model:layout="layout" :is-editable="editMode">
+
+    <GridContainer 
+      v-model:layout="layout" 
+      :is-editable="editMode"
+      @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
@@ -206,6 +242,7 @@ const toggleEditMode = async () => {
 }
 
 main {
-  padding-bottom: 120px; /* ⬅️ Aggiungi spazio per il footer */
+  padding-bottom: 120px;
+  /* ⬅️ Aggiungi spazio per il footer */
 }
 </style>

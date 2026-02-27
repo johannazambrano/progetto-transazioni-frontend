@@ -1,21 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component } from "vue";
+import { ref, onMounted, type Component, computed } from "vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { useCategoryStore } from "@/stores/categoryStore";
-
-// Import dei componenti atomici
 import CategoryTable from "@/components/CategoryTable.vue";
 import CategoryForm from "@/components/CategoryForm.vue";
 import CategoryStats from "@/components/CategoryStats.vue";
-import Header from "@/components/Header.vue";
 import _GridContainer from "@/components/GridContainer.vue";
-
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
-import { DEFAULT_LAYOUT_CATEGORIES, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
+import { DEFAULT_LAYOUT_CATEGORIES } from "@/constants/app.constants";
+import { useLayoutStore } from "@/stores/layoutStore";
 
-// VARIABILI
+const componentName = "CategoriesView"; // nome del componente usato per associazione al suo layout specifico
+// TODO: introdurre sistema di monitoraggio modifiche layout di cui stavo parlando con gemini https://gemini.google.com/gem/5f91cf3cc017/70791778929eb989
+// TODO: finire implementazione all'interno dello layoutStore per il paggaggio del layout modificato
+
+// --- STORE ---
 const categoryStore = useCategoryStore();
+const layoutStore = useLayoutStore();
+
+// --- VARIABILI ---
 const GridContainer = _GridContainer as any;
+const editMode = ref(false);
 
 // Mappa dei componenti - chiave: ID componente
 const componentMap: Record<string, Component> = {
@@ -24,22 +29,28 @@ const componentMap: Record<string, Component> = {
   stats: CategoryStats,
 };
 
-const layout = ref<LayoutItemVO[]>([]);
+// --- COMPUTED ---
+const layout = computed({
+  get: () => layoutStore.layoutItems,
+  set: (newLayout) => layoutStore.updateLayoutItems(newLayout)
+});
 
 
-const editMode = ref(false); // Stato per la modalità di modifica del layout
-
-// --- FUNZIONI
+// --- FUNZIONI ---
 // Funzione per ottenere il componente dalla mappa
 const getComponent = (itemId: string): Component | undefined => {
   return componentMap[itemId];
 };
 
-onMounted(() => {
-  // Carica il layout salvato
-  layout.value = loadLayout();
+onMounted(async () => {
+  try {
+    await layoutStore.fetchLayout(componentName, false);
+    console.log("[CategoriesView.onMounted] ✅ Layout caricato");
+  } catch (error) {
+    console.warn("[CategoriesView.onMounted] ⚠️ Errore nel caricamento del layout, uso quello di default: ", DEFAULT_LAYOUT_CATEGORIES);
+    await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
+  }
 
-  // Carica i dati degli store
   categoryStore.fetchCategories();
 });
 
@@ -47,51 +58,51 @@ onMounted(() => {
  * Carica il layout salvato da localStorage
  * Se non esiste, restituisce il layout di default
  */
-const loadLayout = (): LayoutItemVO[] => {
-  try {
-    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+// const loadLayout = (): LayoutItemVO[] => {
+//   try {
+//     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
 
-    if (savedLayout) {
-      const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
+//     if (savedLayout) {
+//       const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
 
-      // Validazione: assicurati che tutti gli elementi richiesti esistano
-      const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
-      const savedIds = parsed.map(item => item.i);
-      const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
+//       // Validazione: assicurati che tutti gli elementi richiesti esistano
+//       const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
+//       const savedIds = parsed.map(item => item.i);
+//       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
 
-      if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
-        console.log("[CategoriesView.loadLayout] ✅ Layout caricato da localStorage");
-        return parsed;
-      } else {
-        console.warn("[CategoriesView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
-        return [...DEFAULT_LAYOUT_CATEGORIES];
-      }
-    }
-  } catch (error) {
-    console.error("[CategoriesView.loadLayout] ❌ Errore nel caricamento del layout:", error);
-  }
+//       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
+//         console.log("[CategoriesView.loadLayout] ✅ Layout caricato da localStorage");
+//         return parsed;
+//       } else {
+//         console.warn("[CategoriesView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
+//         return [...DEFAULT_LAYOUT_CATEGORIES];
+//       }
+//     }
+//   } catch (error) {
+//     console.error("[CategoriesView.loadLayout] ❌ Errore nel caricamento del layout:", error);
+//   }
 
-  console.log("[CategoriesView.loadLayout] 📋 Uso layout di default");
-  return [...DEFAULT_LAYOUT_CATEGORIES];
-};
+//   console.log("[CategoriesView.loadLayout] 📋 Uso layout di default");
+//   return [...DEFAULT_LAYOUT_CATEGORIES];
+// };
 
 /**
  * Salva il layout corrente in localStorage
  */
-const saveLayout = (layoutToSave: LayoutItemVO[]) => {
-  try {
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-    console.log("[CategoriesView.saveLayout] 💾 Layout salvato");
-  } catch (error) {
-    console.error("[CategoriesView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
-  }
-};
+// const saveLayout = (layoutToSave: LayoutItemVO[]) => {
+//   try {
+//     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
+//     console.log("[CategoriesView.saveLayout] 💾 Layout salvato");
+//   } catch (error) {
+//     console.error("[CategoriesView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
+//   }
+// };
 
 
-const toggleEditMode = () => {
+const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit, salva il layout
-  if (!editMode.value) {
-    saveLayout(layout.value);
+  if (editMode.value && !layoutStore.currentLayout?.isDefault && layoutStore.currentLayout !== null) {
+    await layoutStore.saveLayout(layoutStore.currentLayout);
     console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
   }
 
@@ -101,11 +112,45 @@ const toggleEditMode = () => {
 /**
  * Resetta il layout al default
  */
-const resetLayout = () => {
+const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    layout.value = [...DEFAULT_LAYOUT_CATEGORIES];
-    // saveLayout(layout.value);
+    // layout.value = await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES);
     console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
+  }
+};
+
+// HomeView.vue o CategoriesView.vue
+const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
+  if (!layoutStore.currentLayout) return;
+
+  // Se è il layout di default, dobbiamo creare un "clone" personalizzato
+  if (layoutStore.currentLayout.isDefault) {
+
+    layoutStore.currentLayout = {
+      ...layoutStore.currentLayout,
+      id: undefined, // Il backend genererà il nuovo ID
+      layoutName: componentName,
+      isDefault: false,
+      layoutItems: [...newItems] // Nuove posizioni
+    };
+
+    console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+
+    // const newLayoutRequest = {
+    //   name: componentName, // "HomeView" o "CategoriesView"
+    //   isDefault: false,
+    //   layoutItems: newItems,
+    //   // ... altri campi necessari al tuo DTO
+    // };
+
+    console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
+
+    // Chiamata allo store per il POST
+    // await layoutStore.saveNewLayout(newLayoutRequest);
+  } else {
+    // Se non è default, aggiorni semplicemente quello esistente
+    // layoutStore.updateLayoutItems(newItems);
+    // Opzionale: chiamata PUT automatica o salvataggio al "Lock"
   }
 };
 </script>
@@ -134,7 +179,10 @@ const resetLayout = () => {
         <span>{{ editMode ? "Blocca Layout" : "Modifica Layout" }}</span>
       </button>
     </div>
-    <GridContainer v-model:layout="layout" :is-editable="editMode">
+    <GridContainer 
+      v-model:layout="layout" 
+      :is-editable="editMode" 
+      @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
