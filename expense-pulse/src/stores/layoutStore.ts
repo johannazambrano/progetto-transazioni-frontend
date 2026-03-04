@@ -205,8 +205,8 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Aggiorna il layout corrente
    */
-  const updateLayout = async () => {
-    if (!currentLayout.value) {
+  const updateLayout = async (layoutData: LayoutVO) => {
+    if (!layoutData) {
       error.value = 'Nessun layout da aggiornare';
       return;
     }
@@ -215,8 +215,8 @@ export const useLayoutStore = defineStore('layout', () => {
     error.value = null;
 
     try {
-      const dto = LayoutMapper.toDTO(currentLayout.value);
-      const response = await api.put<LayoutDTO>('/layouts', dto);
+      const dto = LayoutMapper.toDTO(layoutData);
+      const response = await api.put<LayoutDTO>(`/layouts/${dto.id}`, dto);
       currentLayout.value = LayoutMapper.toVO(response.data);
       console.debug('[layoutStore.updateLayout] 🔄 Layout aggiornato');
     } catch (e) {
