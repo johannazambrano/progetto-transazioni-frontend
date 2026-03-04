@@ -10,17 +10,23 @@ import type { FiltroLayoutDTO } from '@/models/dtos/FiltroLayoutDTO';
 
 
 export const useLayoutStore = defineStore('layout', () => {
+
   // --- STATE ---
   const currentLayout = ref<LayoutVO | null>(null);
   const allLayouts = ref<LayoutVO[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const isUsingFallback = ref(false);
+  // const isUsingFallback = ref(false);
 
 
   // --- GETTERS (computed) ---
   const hasLayout = computed(() => currentLayout.value !== null);
   const layoutItems = computed(() => currentLayout.value?.layoutItems || []);
+  // Verifica se un componente è presente nel layout
+  const hasComponent = computed(() => (componentId: string) => {
+    if (!currentLayout.value) return false;
+    return currentLayout.value.layoutItems.some(item => item.i === componentId);
+  });
 
   /**
  * Crea un layout VO dalle costanti di default
@@ -40,13 +46,6 @@ export const useLayoutStore = defineStore('layout', () => {
   //   };
   // };
 
-  /**
-   * Verifica se un componente è presente nel layout
-   */
-  const hasComponent = computed(() => (componentId: string) => {
-    if (!currentLayout.value) return false;
-    return currentLayout.value.layoutItems.some(item => item.i === componentId);
-  });
 
   // --- HELPER FUNCTIONS ---
 
@@ -105,16 +104,16 @@ export const useLayoutStore = defineStore('layout', () => {
     }
     loading.value = true;
     error.value = null;
-    isUsingFallback.value = false;
+    // isUsingFallback.value = false;
 
-    if (!USE_BACKEND_LAYOUTS) {
-      console.warn('[layoutStore.fetchLayout] ⚠️ Backend layouts disabilitato, uso layout dalle costanti');
-      // currentLayout.value = createDefaultLayoutVO(layoutName);
-      isUsingFallback.value = true;
-      loading.value = false;
-      console.log('[layoutStore.fetchLayout] 🔍 USE_BACKEND_LAYOUTS:', USE_BACKEND_LAYOUTS);
-      return;
-    }
+    // if (!USE_BACKEND_LAYOUTS) {
+    //   console.warn('[layoutStore.fetchLayout] ⚠️ Backend layouts disabilitato, uso layout dalle costanti');
+    //   // currentLayout.value = createDefaultLayoutVO(layoutName);
+    //   // isUsingFallback.value = true;
+    //   loading.value = false;
+    //   console.log('[layoutStore.fetchLayout] 🔍 USE_BACKEND_LAYOUTS:', USE_BACKEND_LAYOUTS);
+    //   return;
+    // }
 
     try {
       let response;
@@ -132,7 +131,7 @@ export const useLayoutStore = defineStore('layout', () => {
       if (isDefault) {
         console.warn(`[layoutStore.fetchLayout] 🔄 Fallback definitivo a costanti locali per: ${layoutName}`);
         // currentLayout.value = createDefaultLayoutVO(layoutName);
-        isUsingFallback.value = true;
+        // isUsingFallback.value = true;
         error.value = 'Backend non disponibile, uso layout locale';
       } else {
         // Rilancia l'errore per permettere al chiamante (es. CategoriesView) di gestire il retry
@@ -219,7 +218,7 @@ export const useLayoutStore = defineStore('layout', () => {
       const dto = LayoutMapper.toDTO(currentLayout.value);
       const response = await api.put<LayoutDTO>('/layouts', dto);
       currentLayout.value = LayoutMapper.toVO(response.data);
-      console.log('[layoutStore.updateLayout] 🔄 Layout aggiornato');
+      console.debug('[layoutStore.updateLayout] 🔄 Layout aggiornato');
     } catch (e) {
       console.error('[layoutStore.updateLayout] ❌ Errore nell\'aggiornamento del layout:', e);
       error.value = 'Impossibile aggiornare il layout';
@@ -232,32 +231,34 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Elimina un layout
    */
-  const deleteLayout = async (layoutName: string) => {
-    if (layoutName === 'default') {
-      error.value = 'Non puoi eliminare il layout di default';
-      return;
-    }
-
-    loading.value = true;
-    error.value = null;
-
-    try {
-      await api.delete(`/layouts/${layoutName}`);
-
-      // Rimuovi dalla lista locale
-      allLayouts.value = allLayouts.value.filter(l => l.layoutName !== layoutName);
-
-      // Se era quello corrente, carica il default
-      if (currentLayout.value?.layoutName === layoutName) {
-        await fetchLayout(layoutName);
+  const deleteLayout = async (layoutDeleting: LayoutVO) => {
+    if(layoutDeleting !== null) {
+      if (layoutDeleting.isDefault) {
+        error.value = 'Non puoi eliminare il layout di default';
+        return;
       }
 
-      console.log('[layoutStore.deleteLayout] 🗑️ Layout eliminato:', layoutName);
-    } catch (e) {
-      console.error('[layoutStore.deleteLayout] ❌ Errore nell\'eliminazione del layout:', e);
-      error.value = 'Impossibile eliminare il layout';
-    } finally {
-      loading.value = false;
+      loading.value = true;
+      error.value = null;
+
+      try {
+        await api.delete(`/layouts/${layoutDeleting.id}`);
+
+        // Rimuovi dalla lista locale
+        // allLayouts.value = allLayouts.value.filter(l => l.layoutName !== layoutName);
+
+        // Se era quello corrente, carica il default
+        // if (currentLayout.value?.layoutName === layoutName) {
+        //   await fetchLayout(layoutName);
+        // }
+
+        console.log('[layoutStore.deleteLayout] 🗑️ Layout eliminato:', layoutDeleting.layoutName);
+      } catch (e) {
+        console.error('[layoutStore.deleteLayout] ❌ Errore nell\'eliminazione del layout:', e);
+        error.value = 'Impossibile eliminare il layout';
+      } finally {
+        loading.value = false;
+      }
     }
   };
 
@@ -268,12 +269,12 @@ export const useLayoutStore = defineStore('layout', () => {
     loading.value = true;
     error.value = null;
 
-    if (!USE_BACKEND_LAYOUTS || isUsingFallback.value) {
-      console.warn('🔄 Reset al layout dalle costanti');
-      // currentLayout.value = createDefaultLayoutVO();
-      loading.value = false;
-      return;
-    }
+    // if (!USE_BACKEND_LAYOUTS || isUsingFallback.value) {
+    //   console.warn('🔄 Reset al layout dalle costanti');
+    //   // currentLayout.value = createDefaultLayoutVO();
+    //   loading.value = false;
+    //   return;
+    // }
 
     const filtroLayoutDto: FiltroLayoutDTO = {
       layoutName: currentLayout.value?.layoutName || 'default',
@@ -289,7 +290,7 @@ export const useLayoutStore = defineStore('layout', () => {
 
       console.warn('[layoutStore.resetLayout] 🔄 Reset con fallback alle costanti');
       // currentLayout.value = createDefaultLayoutVO();
-      isUsingFallback.value = true;
+      // isUsingFallback.value = true;
       error.value = 'Backend non disponibile, layout resettato localmente';
     } finally {
       loading.value = false;
@@ -400,7 +401,7 @@ export const useLayoutStore = defineStore('layout', () => {
     allLayouts,
     loading,
     error,
-    isUsingFallback,
+    // isUsingFallback,
 
     // Getters (computed)
     hasLayout,

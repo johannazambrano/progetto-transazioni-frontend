@@ -11,8 +11,6 @@ import { DEFAULT_LAYOUT_CATEGORIES } from "@/constants/app.constants";
 import { useLayoutStore } from "@/stores/layoutStore";
 
 const componentName = "CategoriesView"; // nome del componente usato per associazione al suo layout specifico
-// TODO: introdurre sistema di monitoraggio modifiche layout di cui stavo parlando con gemini https://gemini.google.com/gem/5f91cf3cc017/70791778929eb989
-// TODO: finire implementazione all'interno dello layoutStore per il paggaggio del layout modificato
 
 // --- STORE ---
 const categoryStore = useCategoryStore();
@@ -101,9 +99,26 @@ onMounted(async () => {
 
 const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit, salva il layout
-  if (editMode.value && !layoutStore.currentLayout?.isDefault && layoutStore.currentLayout !== null) {
-    await layoutStore.saveLayout(layoutStore.currentLayout);
-    console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
+  // if (
+  //   editMode.value && 
+  //   !layoutStore.currentLayout?.isDefault && 
+  //   layoutStore.currentLayout !== null
+  // ) {
+  //   await layoutStore.saveLayout(layoutStore.currentLayout);
+  //   console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
+  // }
+  if (editMode.value && layoutStore.currentLayout !== null) {
+    if (layoutStore.currentLayout.isDefault) {
+      layoutStore.currentLayout = {
+        ...layoutStore.currentLayout,
+        id: undefined,
+        layoutName: componentName,
+        isDefault: false,
+      };
+      console.log("[CategoriesView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
+      await layoutStore.saveLayout(layoutStore.currentLayout);
+      console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
+    }
   }
 
   editMode.value = !editMode.value;
@@ -114,7 +129,7 @@ const toggleEditMode = async () => {
  */
 const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    // layout.value = await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES);
+    await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
     console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
   }
 };
@@ -126,15 +141,17 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   // Se è il layout di default, dobbiamo creare un "clone" personalizzato
   if (layoutStore.currentLayout.isDefault) {
 
-    layoutStore.currentLayout = {
-      ...layoutStore.currentLayout,
-      id: undefined, // Il backend genererà il nuovo ID
-      layoutName: componentName,
-      isDefault: false,
-      layoutItems: [...newItems] // Nuove posizioni
-    };
+    console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(newItems)}`)
+    layoutStore.updateLayoutItems(newItems);
+    // layoutStore.currentLayout = {
+    //   ...layoutStore.currentLayout,
+    //   id: undefined, // Il backend genererà il nuovo ID
+    //   layoutName: componentName,
+    //   isDefault: false,
+    //   layoutItems: [...newItems] // Nuove posizioni
+    // };
 
-    console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+    // console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
 
     // const newLayoutRequest = {
     //   name: componentName, // "HomeView" o "CategoriesView"
@@ -185,7 +202,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
       @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
-          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />
       </template>
     </GridContainer>
   </main>

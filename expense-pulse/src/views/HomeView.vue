@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component, computed } from "vue";
+import { ref, onMounted, type Component, computed, watch } from "vue";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
@@ -34,6 +34,10 @@ const componentMap: Record<string, Component> = {
 const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
+
+watch(() => layoutStore.currentLayout, (val) => {
+  console.log('[DEBUG] currentLayout changed → isDefault:', val?.isDefault, '| id:', val?.id);
+}, { immediate: true, deep: false });
 
 // --- COMPUTED ---
 // Il layout ora viene dallo store invece che da ref locale
@@ -120,7 +124,12 @@ window.scrollTo({ top: 0, behavior: "smooth" });
 const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
     try {
-      await layoutStore.resetLayout();
+      await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
+      console.log("[HomeView.resetLayout] Caricato layout di default");
+      if(layoutStore.currentLayout !== null) {
+        await layoutStore.deleteLayout(layoutStore.currentLayout);
+      }
+
       console.log("[HomeView.resetLayout] 🔄 Layout resettato");
     } catch (error) {
       console.error("[HomeView.resetLayout] ❌ Errore nel reset del layout");
@@ -144,9 +153,27 @@ const resetLayout = async () => {
 
 const toggleEditMode = async () => {
   // Se stiamo uscendo dalla modalità edit (quindi editMode è true), salva il layout
-  if (editMode.value && !layoutStore.currentLayout?.isDefault && layoutStore.currentLayout !== null) {
-    await layoutStore.saveLayout(layoutStore.currentLayout);
-    console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
+  // if (
+  //     editMode.value && 
+  //     !layoutStore.currentLayout?.isDefault && 
+  //     layoutStore.currentLayout !== null
+  //   ) {
+  //   await layoutStore.saveLayout(layoutStore.currentLayout);
+  //   console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
+  // }
+  
+  if (editMode.value && layoutStore.currentLayout !== null) {
+    if (layoutStore.currentLayout.isDefault) {
+      layoutStore.currentLayout = {
+        ...layoutStore.currentLayout,
+        id: undefined,
+        layoutName: componentName,
+        isDefault: false,
+      };
+      console.log("[HomeView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
+      await layoutStore.saveLayout(layoutStore.currentLayout);
+      console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
+    }
   }
 
   editMode.value = !editMode.value;
@@ -156,34 +183,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   if (!layoutStore.currentLayout) return;
 
   // Se è il layout di default, dobbiamo creare un "clone" personalizzato
-  if (layoutStore.currentLayout.isDefault) {
-
-    layoutStore.currentLayout = {
-      ...layoutStore.currentLayout,
-      id: undefined, // Il backend genererà il nuovo ID
-      layoutName: componentName,
-      isDefault: false,
-      layoutItems: [...newItems] // Nuove posizioni
-    };
-
-    console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
-
-    // const newLayoutRequest = {
-    //   name: componentName, // "HomeView" o "CategoriesView"
-    //   isDefault: false,
-    //   layoutItems: newItems,
-    //   // ... altri campi necessari al tuo DTO
-    // };
-
-    console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
-
-    // Chiamata allo store per il POST
-    // await layoutStore.saveNewLayout(newLayoutRequest);
-  } else {
-    // Se non è default, aggiorni semplicemente quello esistente
-    // layoutStore.updateLayoutItems(newItems);
-    // Opzionale: chiamata PUT automatica o salvataggio al "Lock"
-  }
+  layoutStore.updateLayoutItems(newItems);
 };
 </script>
 
@@ -191,10 +191,10 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   <main class="mx-auto p-6">
     <header>
       <!-- <Header /> -->
-      <div v-if="layoutStore.isUsingFallback"
+      <!-- <div v-if="layoutStore.isUsingFallback"
         class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
         ⚠️ Modalità sviluppo: usando layout locale
-      </div>
+      </div> -->
     </header>
 
     <div class="flex justify-end mr-3 mb-4 gap-2">
@@ -222,7 +222,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
       @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
-          :class="!editMode ? '' : 'rounded-2xl shadow-sm border dashed border-indigo-500/30 overflow-hidden fit-content'" />
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />
       </template>
     </GridContainer>
   </main>

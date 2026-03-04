@@ -47,3 +47,13 @@ const onLayoutUpdated = (newLayout) => {
     </grid-item>
   </grid-layout>
 </template>
+
+<style scoped>
+/* 
+FUNZIONAMENTO:
+Su dispositivi touch, il browser di default "consuma" certi gesti (scroll, zoom) prima che arrivino a JavaScript. Con touch-action: none dici al browser "lascia passare tutti i touch event a JS senza interpretarli", permettendo a interact.js di gestirli correttamente per il drag/resize.
+*/
+:deep(.vue-grid-item) {
+  touch-action: none;
+}
+</style>
