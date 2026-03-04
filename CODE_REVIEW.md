@@ -14,29 +14,29 @@
 🚧 -> attività in corso   
 
 ### 🔴 Backend - Bug Critici
-- [ ] [BUG-1: `convertDtoToEntity()` ritorna sempre null](#bug-1-convertdtotoentity-ritorna-sempre-null)
-- [ ] [BUG-4: `aggiornaCategory()` cerca per codice invece che per id](#bug-4-aggiornacategory-cerca-per-codice-invece-che-per-id)
-- [ ] [BUG-5: `aggiornaCategory()` inghiotte MongoWriteException non-11000](#bug-5-aggiornacategory-inghiotte-mongowriteexception-non-11000)
-- [ ] [BUG-10: Regex injection nelle query di ricerca](#bug-10-regex-injection-nelle-query-di-ricerca)
+- [✅] [BUG-1: `convertDtoToEntity()` ritorna sempre null](#bug-1-convertdtotoentity-ritorna-sempre-null)
+- [✅] [BUG-4: `aggiornaCategory()` cerca per codice invece che per id](#bug-4-aggiornacategory-cerca-per-codice-invece-che-per-id)
+- [✅] [BUG-5: `aggiornaCategory()` inghiotte MongoWriteException non-11000](#bug-5-aggiornacategory-inghiotte-mongowriteexception-non-11000)
+- [✅] [BUG-10: Regex injection nelle query di ricerca](#bug-10-regex-injection-nelle-query-di-ricerca)
 
 ### 🟠 Backend - Bug Importanti
-- [ ] [BUG-2: `findCategoryByCodice()` ritorna null silenziosamente](#bug-2-findcategorybycodice-ritorna-null-silenziosamente)
-- [ ] [BUG-3: Exception handling cattura la propria ServiceException](#bug-3-exception-handling-cattura-la-propria-serviceexception)
-- [ ] [BUG-6: `findByFiltro()` ritorna null - API risponde 200 con body vuoto](#bug-6-findbyfiltro-ritorna-null---api-risponde-200-con-body-vuoto)
-- [ ] [BUG-7: NullPointerException in `convertEntityToDto()` quando `getId()` e null](#bug-7-nullpointerexception-in-convertentitytodto-quando-getid-e-null)
-- [ ] [BUG-8: Entity layer referenzia DTO dell'API layer](#bug-8-entity-layer-referenzia-dto-dellapi-layer)
-- [ ] [BUG-9: Date confrontate come stringhe](#bug-9-date-confrontate-come-stringhe)
+- [✅] [BUG-2: `findCategoryByCodice()` ritorna null silenziosamente](#bug-2-findcategorybycodice-ritorna-null-silenziosamente)
+- [✅] [BUG-3: Exception handling cattura la propria ServiceException](#bug-3-exception-handling-cattura-la-propria-serviceexception)
+- [✅] [BUG-6: `findByFiltro()` ritorna null - API risponde 200 con body vuoto](#bug-6-findbyfiltro-ritorna-null---api-risponde-200-con-body-vuoto)
+- [✅] [BUG-7: NullPointerException in `convertEntityToDto()` quando `getId()` e null](#bug-7-nullpointerexception-in-convertentitytodto-quando-getid-e-null)
+- [✅] [BUG-8: Entity layer referenzia DTO dell'API layer](#bug-8-entity-layer-referenzia-dto-dellapi-layer)
+- [✅] [BUG-9: Date confrontate come stringhe](#bug-9-date-confrontate-come-stringhe)
 
 ### 🟡 Backend - Qualità del Codice
-- [ ] [CQ-1: Campi public su classi con Lombok @Data](#cq-1-campi-public-su-classi-con-lombok-data)
-- [ ] [CQ-2: Import inutilizzati](#cq-2-import-inutilizzati)
-- [ ] [CQ-3: Variabile inutilizzata](#cq-3-variabile-inutilizzata)
-- [ ] [CQ-4: Injection inutilizzata](#cq-4-injection-inutilizzata)
+- [✅] [CQ-1: Campi public su classi con Lombok @Data](#cq-1-campi-public-su-classi-con-lombok-data)
+- [✅] [CQ-2: Import inutilizzati](#cq-2-import-inutilizzati)
+- [✅] [CQ-3: Variabile inutilizzata](#cq-3-variabile-inutilizzata)
+- [✅] [CQ-4: Injection inutilizzata](#cq-4-injection-inutilizzata)
 - [ ] [CQ-5: Naming inconsistente - mix italiano/inglese](#cq-5-naming-inconsistente---mix-italianoinglese)
-- [ ] [CQ-6: Log con prefissi errati](#cq-6-log-con-prefissi-errati)
-- [ ] [CQ-7: Codice commentato in produzione](#cq-7-codice-commentato-in-produzione)
-- [ ] [CQ-8: Annotazione `@Consumes` duplicata](#cq-8-annotazione-consumes-duplicata)
-- [ ] [CQ-9: Repository accetta DTO direttamente](#cq-9-repository-accetta-dto-direttamente)
+- [✅] [CQ-6: Log con prefissi errati](#cq-6-log-con-prefissi-errati)
+- [🚧] [CQ-7: Codice commentato in produzione](#cq-7-codice-commentato-in-produzione)
+- [✅] [CQ-8: Annotazione `@Consumes` duplicata](#cq-8-annotazione-consumes-duplicata)
+- [✅] [CQ-9: Repository accetta DTO direttamente](#cq-9-repository-accetta-dto-direttamente)
 
 ### 🏗️ Backend - Architettura
 - [ ] [ARCH-1: Nessun ExceptionMapper](#arch-1-nessun-exceptionmapper)
