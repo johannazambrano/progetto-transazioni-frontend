@@ -52,61 +52,7 @@ onMounted(async () => {
   categoryStore.fetchCategories();
 });
 
-/**
- * Carica il layout salvato da localStorage
- * Se non esiste, restituisce il layout di default
- */
-// const loadLayout = (): LayoutItemVO[] => {
-//   try {
-//     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-
-//     if (savedLayout) {
-//       const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
-
-//       // Validazione: assicurati che tutti gli elementi richiesti esistano
-//       const requiredIds = DEFAULT_LAYOUT_CATEGORIES.map(item => item.i);
-//       const savedIds = parsed.map(item => item.i);
-//       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
-
-//       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_CATEGORIES.length) {
-//         console.log("[CategoriesView.loadLayout] ✅ Layout caricato da localStorage");
-//         return parsed;
-//       } else {
-//         console.warn("[CategoriesView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
-//         return [...DEFAULT_LAYOUT_CATEGORIES];
-//       }
-//     }
-//   } catch (error) {
-//     console.error("[CategoriesView.loadLayout] ❌ Errore nel caricamento del layout:", error);
-//   }
-
-//   console.log("[CategoriesView.loadLayout] 📋 Uso layout di default");
-//   return [...DEFAULT_LAYOUT_CATEGORIES];
-// };
-
-/**
- * Salva il layout corrente in localStorage
- */
-// const saveLayout = (layoutToSave: LayoutItemVO[]) => {
-//   try {
-//     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-//     console.log("[CategoriesView.saveLayout] 💾 Layout salvato");
-//   } catch (error) {
-//     console.error("[CategoriesView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
-//   }
-// };
-
-
 const toggleEditMode = async () => {
-  // Se stiamo uscendo dalla modalità edit, salva il layout
-  // if (
-  //   editMode.value && 
-  //   !layoutStore.currentLayout?.isDefault && 
-  //   layoutStore.currentLayout !== null
-  // ) {
-  //   await layoutStore.saveLayout(layoutStore.currentLayout);
-  //   console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
-  // }
   if (editMode.value && layoutStore.currentLayout !== null) {
     if (layoutStore.currentLayout.isDefault) {
       layoutStore.currentLayout = {
@@ -143,39 +89,15 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
 
     console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(newItems)}`)
     layoutStore.updateLayoutItems(newItems);
-    // layoutStore.currentLayout = {
-    //   ...layoutStore.currentLayout,
-    //   id: undefined, // Il backend genererà il nuovo ID
-    //   layoutName: componentName,
-    //   isDefault: false,
-    //   layoutItems: [...newItems] // Nuove posizioni
-    // };
-
-    // console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
-
-    // const newLayoutRequest = {
-    //   name: componentName, // "HomeView" o "CategoriesView"
-    //   isDefault: false,
-    //   layoutItems: newItems,
-    //   // ... altri campi necessari al tuo DTO
-    // };
 
     console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
-
-    // Chiamata allo store per il POST
-    // await layoutStore.saveNewLayout(newLayoutRequest);
-  } else {
-    // Se non è default, aggiorni semplicemente quello esistente
-    // layoutStore.updateLayoutItems(newItems);
-    // Opzionale: chiamata PUT automatica o salvataggio al "Lock"
-  }
+  } 
 };
 </script>
 
 <template>
   <main class="mx-auto p-6">
     <header>
-      <!-- <Header /> -->
     </header>
 
     <div class="flex justify-end mr-3 mb-4">

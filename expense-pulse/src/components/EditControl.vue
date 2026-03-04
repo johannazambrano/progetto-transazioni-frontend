@@ -20,7 +20,7 @@ const layout = ref<LayoutItemVO[]>([]);
  */
 const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    layout.value = [...DEFAULT_LAYOUT_HOME];
+    // layout.value = [...DEFAULT_LAYOUT_HOME];
     // saveLayout(layout.value);
     console.log("[EditControl.resetLayout] 🔄 Layout resettato");
   }

@@ -75,50 +75,6 @@ window.scrollTo({ top: 0, behavior: "smooth" });
 // --- FUNZIONI DI PERSISTENZA ---
 
 /**
- * Carica il layout salvato da localStorage
- * Se non esiste, restituisce il layout di default
- */
-// const loadLayout = (): LayoutItemVO[] => {
-//   try {
-//     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-
-//     if (savedLayout) {
-//       const parsed = JSON.parse(savedLayout) as LayoutItemVO[];
-
-//       // Validazione: assicurati che tutti gli elementi richiesti esistano
-//       const requiredIds = DEFAULT_LAYOUT_HOME.map(item => item.i);
-//       const savedIds = parsed.map(item => item.i);
-//       const allIdsPresent = requiredIds.every(id => savedIds.includes(id));
-
-//       if (allIdsPresent && parsed.length === DEFAULT_LAYOUT_HOME.length) {
-//         console.log("[HomeView.loadLayout] ✅ Layout caricato da localStorage");
-//         return parsed;
-//       } else {
-//         console.warn("[HomeView.loadLayout] ⚠️ Layout salvato incompleto, uso quello di default");
-//         return [...DEFAULT_LAYOUT_HOME];
-//       }
-//     }
-//   } catch (error) {
-//     console.error("[HomeView.loadLayout] ❌ Errore nel caricamento del layout:", error);
-//   }
-
-//   console.log("[HomeView.loadLayout] 📋 Uso layout di default");
-//   return [...DEFAULT_LAYOUT_HOME];
-// };
-
-/**
- * Salva il layout corrente in localStorage
- */
-// const saveLayout = (layoutToSave: LayoutItemVO[]) => {
-//   try {
-//     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutToSave));
-//     console.log("[HomeView.saveLayout] 💾 Layout salvato");
-//   } catch (error) {
-//     console.error("[HomeView.saveLayout] ❌ Errore nel salvataggio del layout:", error);
-//   }
-// };
-
-/**
  * Resetta il layout al default
  */
 const resetLayout = async () => {
@@ -137,30 +93,7 @@ const resetLayout = async () => {
   }
 };
 
-/**
- * Handler per l'evento di aggiornamento del layout
- * Viene chiamato quando l'utente trascina o ridimensiona un elemento
- */
-// const handleLayoutUpdated = async (newLayout: LayoutItemVO[]) => {
-
-//   layoutStore.updateLayoutItems(newLayout);
-
-//   // Salva automaticamente solo se non in edit mode (cioè quando l'utente ha finito di modificare)
-//   if (!editMode.value) {
-//     await layoutStore.saveLayout();
-//   }
-// };
-
 const toggleEditMode = async () => {
-  // Se stiamo uscendo dalla modalità edit (quindi editMode è true), salva il layout
-  // if (
-  //     editMode.value && 
-  //     !layoutStore.currentLayout?.isDefault && 
-  //     layoutStore.currentLayout !== null
-  //   ) {
-  //   await layoutStore.saveLayout(layoutStore.currentLayout);
-  //   console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
-  // }
   
   if (editMode.value && layoutStore.currentLayout !== null) {
     if (layoutStore.currentLayout.isDefault) {
@@ -190,11 +123,6 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
 <template>
   <main class="mx-auto p-6">
     <header>
-      <!-- <Header /> -->
-      <!-- <div v-if="layoutStore.isUsingFallback"
-        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-        ⚠️ Modalità sviluppo: usando layout locale
-      </div> -->
     </header>
 
     <div class="flex justify-end mr-3 mb-4 gap-2">
@@ -243,6 +171,5 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
 
 main {
   padding-bottom: 120px;
-  /* ⬅️ Aggiungi spazio per il footer */
 }
 </style>
