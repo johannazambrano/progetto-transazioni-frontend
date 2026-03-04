@@ -96,6 +96,7 @@ const resetLayout = async () => {
 const toggleEditMode = async () => {
   
   if (editMode.value && layoutStore.currentLayout !== null) {
+    console.debug(`[HomeView.toggleEditMode] editMode.value: ${editMode.value}`)
     if (layoutStore.currentLayout.isDefault) {
       layoutStore.currentLayout = {
         ...layoutStore.currentLayout,
@@ -107,6 +108,9 @@ const toggleEditMode = async () => {
       await layoutStore.saveLayout(layoutStore.currentLayout);
       console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
     }
+
+    console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+    await layoutStore.updateLayout(layoutStore.currentLayout);
   }
 
   editMode.value = !editMode.value;
