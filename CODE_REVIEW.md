@@ -56,11 +56,11 @@
 - [ ] [SEC-5: Nessun rate limiting o limite dimensione richieste](#sec-5-nessun-rate-limiting-o-limite-dimensione-richieste)
 
 ### ⚡ Backend - Performance
-- [ ] [PERF-1: Nessun indice MongoDB definito](#perf-1-nessun-indice-mongodb-definito)
-- [ ] [PERF-2: Due round-trip al DB per ogni ricerca](#perf-2-due-round-trip-al-db-per-ogni-ricerca)
-- [ ] [PERF-3: Regex con leading wildcard non possono usare indici](#perf-3-regex-con-leading-wildcard-non-possono-usare-indici)
-- [ ] [PERF-4: Entity caricata interamente per le operazioni di delete](#perf-4-entity-caricata-interamente-per-le-operazioni-di-delete)
-- [ ] [PERF-5: TransactionsServiceImpl @RequestScoped](#perf-5-transactionsserviceimpl-requestscoped)
+- [✅] [PERF-1: Nessun indice MongoDB definito](#perf-1-nessun-indice-mongodb-definito)
+- [✅] [PERF-2: Due round-trip al DB per ogni ricerca](#perf-2-due-round-trip-al-db-per-ogni-ricerca)
+- [✅] [PERF-3: Regex con leading wildcard non possono usare indici](#perf-3-regex-con-leading-wildcard-non-possono-usare-indici)
+- [✅] [PERF-4: Entity caricata interamente per le operazioni di delete](#perf-4-entity-caricata-interamente-per-le-operazioni-di-delete)
+- [✅] [PERF-5: TransactionsServiceImpl @RequestScoped](#perf-5-transactionsserviceimpl-requestscoped)
 
 ### 🧪 Backend - Testing
 - [ ] [TEST-1: Solo test boilerplate - testa endpoint inesistente](#test-1-solo-test-boilerplate---testa-endpoint-inesistente)
