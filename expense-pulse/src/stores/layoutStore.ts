@@ -164,7 +164,7 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Salva il layout corrente
    */
-  const saveLayout = async (layoutData: LayoutVO) => {
+  const saveLayout = async () => {
     console.log('[layoutStore.saveLayout] saveLayout', currentLayout.value);
     if (!currentLayout.value) {
       error.value = 'Nessun layout da salvare';
@@ -185,12 +185,11 @@ export const useLayoutStore = defineStore('layout', () => {
 
       if (currentLayout.value.id && !currentLayout.value.isDefault) {
         // Se ha un ID, facciamo un aggiornamento (PUT)
-        await api.put(`/layouts/${currentLayout.value.id}`, dto);
+        await api.put(`/layouts/${dto.id}`, dto);
         console.log('[layoutStore.saveLayout] 🔄 Layout aggiornato via PUT');
       } else {
         // Altrimenti creazione (POST)
-        const response = await api.post<LayoutDTO>('/layouts', dto);
-        currentLayout.value = LayoutMapper.toVO(response.data);
+        await api.post<LayoutDTO>('/layouts', dto);
         console.log('[layoutStore.saveLayout] 💾 Layout creato via POST');
       }
     } catch (e) {
@@ -205,8 +204,8 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Aggiorna il layout corrente
    */
-  const updateLayout = async (layoutData: LayoutVO) => {
-    if (!layoutData) {
+  const updateLayout = async () => {
+    if (!currentLayout.value) {
       error.value = 'Nessun layout da aggiornare';
       return;
     }
@@ -215,9 +214,8 @@ export const useLayoutStore = defineStore('layout', () => {
     error.value = null;
 
     try {
-      const dto = LayoutMapper.toDTO(layoutData);
-      const response = await api.put<LayoutDTO>(`/layouts/${dto.id}`, dto);
-      currentLayout.value = LayoutMapper.toVO(response.data);
+      const dto = LayoutMapper.toDTO(currentLayout.value);
+      await api.put<LayoutDTO>(`/layouts/${dto.id}`, dto);
       console.debug('[layoutStore.updateLayout] 🔄 Layout aggiornato');
     } catch (e) {
       console.error('[layoutStore.updateLayout] ❌ Errore nell\'aggiornamento del layout:', e);

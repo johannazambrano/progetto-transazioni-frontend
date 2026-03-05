@@ -62,8 +62,11 @@ const toggleEditMode = async () => {
         isDefault: false,
       };
       console.log("[CategoriesView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
-      await layoutStore.saveLayout(layoutStore.currentLayout);
+      await layoutStore.saveLayout();
       console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
+    }else {
+      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+      await layoutStore.updateLayout();
     }
   }
 

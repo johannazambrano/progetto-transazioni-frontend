@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component, computed, watch } from "vue";
+import { ref, onMounted, type Component, computed } from "vue";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
@@ -35,9 +35,9 @@ const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
 
-watch(() => layoutStore.currentLayout, (val) => {
-  console.log('[DEBUG] currentLayout changed → isDefault:', val?.isDefault, '| id:', val?.id);
-}, { immediate: true, deep: false });
+// watch(() => layoutStore.currentLayout, (val) => {
+//   console.log('[DEBUG] currentLayout changed → isDefault:', val?.isDefault, '| id:', val?.id);
+// }, { immediate: true, deep: false });
 
 // --- COMPUTED ---
 // Il layout ora viene dallo store invece che da ref locale
@@ -105,12 +105,13 @@ const toggleEditMode = async () => {
         isDefault: false,
       };
       console.log("[HomeView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
-      await layoutStore.saveLayout(layoutStore.currentLayout);
+      await layoutStore.saveLayout();
       console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
+    }else {
+      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
+      await layoutStore.updateLayout();
     }
 
-    console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
-    await layoutStore.updateLayout(layoutStore.currentLayout);
   }
 
   editMode.value = !editMode.value;
