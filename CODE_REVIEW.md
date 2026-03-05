@@ -43,10 +43,10 @@
 - [✅] [ARCH-2: Nessuna validazione input](#arch-2-nessuna-validazione-input)
 - [✅] [ARCH-3: Stack trace persi nel exception handling](#arch-3-stack-trace-persi-nel-exception-handling)
 - [✅] [ARCH-4: `@Model` su TransactionsServiceImpl](#arch-4-model-su-transactionsserviceimpl)
-- [ ] [ARCH-5: FiltroMapperImpl non e un bean CDI](#arch-5-filtromapperimpl-non-e-un-bean-cdi)
-- [ ] [ARCH-6: Date salvate come stringhe](#arch-6-date-salvate-come-stringhe)
-- [ ] [ARCH-7: Category embedded in Transaction](#arch-7-category-embedded-in-transaction)
-- [ ] [ARCH-8: Business logic nel repository](#arch-8-business-logic-nel-repository)
+- [✅] [ARCH-5: FiltroMapperImpl non e un bean CDI](#arch-5-filtromapperimpl-non-e-un-bean-cdi)
+- [✅] [ARCH-6: Date salvate come stringhe](#arch-6-date-salvate-come-stringhe)
+- [✅] [ARCH-7: Category embedded in Transaction](#arch-7-category-embedded-in-transaction)
+- [✅] [ARCH-8: Business logic nel repository](#arch-8-business-logic-nel-repository)
 
 ### 🔒 Backend - Sicurezza
 - [ ] [SEC-1: Regex injection (vedi BUG-10)](#sec-1-regex-injection-vedi-bug-10)
