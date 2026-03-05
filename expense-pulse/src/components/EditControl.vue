@@ -6,8 +6,7 @@
 import { ref } from "vue";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
-import { DEFAULT_LAYOUT_HOME, LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
-import type { LayoutItem } from "chart.js";
+import { LAYOUT_STORAGE_KEY } from "@/constants/app.constants";
 
 
 // VARIABILI
@@ -20,8 +19,6 @@ const layout = ref<LayoutItemVO[]>([]);
  */
 const resetLayout = () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    // layout.value = [...DEFAULT_LAYOUT_HOME];
-    // saveLayout(layout.value);
     console.log("[EditControl.resetLayout] 🔄 Layout resettato");
   }
 };

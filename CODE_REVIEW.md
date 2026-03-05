@@ -80,8 +80,8 @@
 - [ ] [API-5: Endpoint delete senza documentazione `@APIResponses`](#api-5-endpoint-delete-senza-documentazione-apiresponses)
 
 ### 🔴 Frontend - Bug Critici
-- [ ] [BUG-01: `saveTransaction()` crea una categoria invece di aggiornare una transazione](#bug-01-savetransaction-crea-una-categoria-invece-di-aggiornare-una-transazione)
-- [ ] [BUG-03: Spreading di una stringa corrompe lo stato del layout](#bug-03-spreading-di-una-stringa-corrompe-lo-stato-del-layout)
+- [✅] [BUG-01: `saveTransaction()` crea una categoria invece di aggiornare una transazione](#bug-01-savetransaction-crea-una-categoria-invece-di-aggiornare-una-transazione)
+- [✅] [BUG-03: Spreading di una stringa corrompe lo stato del layout](#bug-03-spreading-di-una-stringa-corrompe-lo-stato-del-layout)
 
 ### 🟠 Frontend - Bug Importanti
 - [ ] [BUG-02: Import eager vanifica il lazy loading](#bug-02-import-eager-vanifica-il-lazy-loading)
