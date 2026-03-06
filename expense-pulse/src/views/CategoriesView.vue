@@ -29,8 +29,8 @@ const componentMap: Record<string, Component> = {
 
 // --- COMPUTED ---
 const layout = computed({
-  get: () => layoutStore.layoutItems,
-  set: (newLayout) => layoutStore.updateLayoutItems(newLayout)
+  get: () => layoutStore.layoutItems(componentName).value,
+  set: (newLayout) => layoutStore.updateLayoutItems(componentName, newLayout)
 });
 
 
@@ -53,20 +53,20 @@ onMounted(async () => {
 });
 
 const toggleEditMode = async () => {
-  if (editMode.value && layoutStore.currentLayout !== null) {
+  if (editMode.value && layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
     if (layoutStore.currentLayout.isDefault) {
-      layoutStore.currentLayout = {
-        ...layoutStore.currentLayout,
+      layoutStore.currentLayout[componentName] = {
+        ...layoutStore.currentLayout[componentName],
         id: undefined,
         layoutName: componentName,
         isDefault: false,
       };
       console.log("[CategoriesView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
-      await layoutStore.saveLayout();
+      await layoutStore.saveLayout(componentName);
       console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
     }else {
-      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
-      await layoutStore.updateLayout();
+      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
+      await layoutStore.updateLayout(componentName);
     }
   }
 
@@ -91,7 +91,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   if (layoutStore.currentLayout.isDefault) {
 
     console.debug(`[CategoriesView.handleLayoutChange] layoutStore.currentLayout: ${JSON.stringify(newItems)}`)
-    layoutStore.updateLayoutItems(newItems);
+    layoutStore.updateLayoutItems(componentName, newItems);
 
     console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
   } 

@@ -84,7 +84,7 @@
 - [✅] [BUG-03: Spreading di una stringa corrompe lo stato del layout](#bug-03-spreading-di-una-stringa-corrompe-lo-stato-del-layout)
 
 ### 🟠 Frontend - Bug Importanti
-- [ ] [BUG-02: Import eager vanifica il lazy loading](#bug-02-import-eager-vanifica-il-lazy-loading)
+- [✅] [BUG-02: Import eager vanifica il lazy loading](#bug-02-import-eager-vanifica-il-lazy-loading)
 - [ ] [BUG-04: Store layout condiviso causa collisione tra view](#bug-04-store-layout-condiviso-causa-collisione-tra-view)
 - [ ] [BUG-05: `window.scrollTo` fuori da onMounted](#bug-05-windowscrollto-fuori-da-onmounted)
 - [ ] [BUG-06: `editTransaction` ref non inizializzata](#bug-06-edittransaction-ref-non-inizializzata)

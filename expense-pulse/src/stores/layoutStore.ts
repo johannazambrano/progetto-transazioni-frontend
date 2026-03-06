@@ -11,19 +11,17 @@ import type { FiltroLayoutDTO } from '@/models/dtos/FiltroLayoutDTO';
 export const useLayoutStore = defineStore('layout', () => {
 
   // --- STATE ---
-  const currentLayout = ref<LayoutVO | null>(null);
+  const currentLayout = ref<Record<string, LayoutVO>>({});
   const allLayouts = ref<LayoutVO[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
 
   // --- GETTERS (computed) ---
-  const hasLayout = computed(() => currentLayout.value !== null);
-  const layoutItems = computed(() => currentLayout.value?.layoutItems || []);
-  // Verifica se un componente è presente nel layout
-  const hasComponent = computed(() => (componentId: string) => {
-    if (!currentLayout.value) return false;
-    return currentLayout.value.layoutItems.some(item => item.i === componentId);
+  const hasLayout = (viewName: string) => computed(() => !!currentLayout.value[viewName]);
+  const layoutItems = (viewName: string) => computed(() => currentLayout.value[viewName]?.layoutItems || []);
+  const hasComponent = (viewName: string) => computed(() => (componentId: string) => {
+    return currentLayout.value[viewName]?.layoutItems.some(item => item.i === componentId) ?? false;
   });
 
   /**
@@ -50,11 +48,12 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Trova una posizione disponibile nella griglia
    */
-  const findAvailablePosition = (width: number, height: number): { x: number; y: number } => {
+  const findAvailablePosition = (viewName: string, width: number, height: number): { x: number; y: number } => {
+    const items = currentLayout.value[viewName]?.layoutItems ?? [];
     if (!currentLayout.value) return { x: 0, y: 0 };
 
     const GRID_COLS = 12;
-    const items = currentLayout.value.layoutItems;
+    // const items = currentLayout.value.layoutItems;
 
     let maxY = 0;
     items.forEach(item => {
@@ -116,13 +115,13 @@ export const useLayoutStore = defineStore('layout', () => {
     try {
       let response;
       // Usa l'endpoint specifico per il layout di default
-      response = await api.post<LayoutDTO>('/layouts/default', filtroLayoutDto);
+      response = await api.post<LayoutDTO>('/layouts/default', {params: filtroLayoutDto});
 
       if (!response.data || (typeof response.data === 'object' && Object.keys(response.data).length === 0)) {
         throw new Error(`Layout "${layoutName}" non trovato`);
       }
 
-      currentLayout.value = LayoutMapper.toVO(response.data);
+      currentLayout.value[layoutName] = LayoutMapper.toVO(response.data);
       console.log('[layoutStore.fetchLayout] ✅ Layout caricato dal backend:', layoutName);
     } catch (e) {
       console.error('[layoutStore.fetchLayout] ❌ Errore nel caricamento del layout dal backend:', e);
@@ -162,15 +161,16 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Salva il layout corrente
    */
-  const saveLayout = async () => {
-    console.log('[layoutStore.saveLayout] saveLayout', currentLayout.value);
-    if (!currentLayout.value) {
+  const saveLayout = async (viewName: string) => {
+    const layout = currentLayout.value[viewName];
+    console.log('[layoutStore.saveLayout] saveLayout', layout);
+    if (!layout) {
       error.value = 'Nessun layout da salvare';
       return;
     }
 
     // Validazione base
-    if (!currentLayout.value.layoutName || currentLayout.value.layoutItems.length === 0) {
+    if (!layout || layout.layoutItems.length === 0) {
       error.value = 'Layout non valido';
       return;
     }
@@ -179,9 +179,9 @@ export const useLayoutStore = defineStore('layout', () => {
     error.value = null;
 
     try {
-      const dto = LayoutMapper.toDTO(currentLayout.value);
+      const dto = LayoutMapper.toDTO(layout);
 
-      if (currentLayout.value.id && !currentLayout.value.isDefault) {
+      if (layout.id && !layout.isDefault) {
         // Se ha un ID, facciamo un aggiornamento (PUT)
         await api.put(`/layouts/${dto.id}`, dto);
         console.log('[layoutStore.saveLayout] 🔄 Layout aggiornato via PUT');
@@ -202,8 +202,10 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Aggiorna il layout corrente
    */
-  const updateLayout = async () => {
-    if (!currentLayout.value) {
+  const updateLayout = async (viewName: string) => {
+    const layout = currentLayout.value[viewName];
+    console.log('[layoutStore.updateLayout] updateLayout', layout);
+    if (!layout) {
       error.value = 'Nessun layout da aggiornare';
       return;
     }
@@ -212,7 +214,7 @@ export const useLayoutStore = defineStore('layout', () => {
     error.value = null;
 
     try {
-      const dto = LayoutMapper.toDTO(currentLayout.value);
+      const dto = LayoutMapper.toDTO(layout);
       await api.put<LayoutDTO>(`/layouts/${dto.id}`, dto);
       console.debug('[layoutStore.updateLayout] 🔄 Layout aggiornato');
     } catch (e) {
@@ -261,7 +263,7 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Resetta al layout di default
    */
-  const resetLayout = async () => {
+  const resetLayout = async (viewName: string) => {
     loading.value = true;
     error.value = null;
 
@@ -273,13 +275,13 @@ export const useLayoutStore = defineStore('layout', () => {
     // }
 
     const filtroLayoutDto: FiltroLayoutDTO = {
-      layoutName: currentLayout.value?.layoutName || 'default',
+      layoutName: currentLayout.value[viewName]?.layoutName || 'default',
       isDefault: true
     }
 
     try {
       const response = await api.post<LayoutDTO>('/layouts/reset', filtroLayoutDto);
-      currentLayout.value = LayoutMapper.toVO(response.data);
+      currentLayout.value[viewName] = LayoutMapper.toVO(response.data);
       console.log('[layoutStore.resetLayout] 🔄 Layout resettato');
     } catch (e) {
       console.error('[layoutStore.resetLayout] ❌ Errore nel reset del layout:', e);
@@ -297,6 +299,7 @@ export const useLayoutStore = defineStore('layout', () => {
    * Aggiunge un componente al layout corrente
    */
   const addComponent = (
+    viewName: string,
     componentId: string,
     config: {
       w: number;
@@ -307,19 +310,20 @@ export const useLayoutStore = defineStore('layout', () => {
       maxH?: number;
     }
   ): LayoutItemVO | null => {
-    if (!currentLayout.value) {
+    const layout = currentLayout.value[viewName];
+    if (!layout) {
       error.value = 'Nessun layout attivo';
       return null;
     }
 
     // Verifica duplicato (come fai con le categorie)
-    if (currentLayout.value.layoutItems.some(item => item.i === componentId)) {
+    if (layout.layoutItems.some(item => item.i === componentId)) {
       error.value = `Il componente "${componentId}" è già presente nel layout`;
       return null;
     }
 
     try {
-      const position = findAvailablePosition(config.w, config.h);
+      const position = findAvailablePosition(viewName, config.w, config.h);
 
       const newItem: LayoutItemVO = {
         i: componentId,
@@ -334,7 +338,7 @@ export const useLayoutStore = defineStore('layout', () => {
         static: false,
       };
 
-      currentLayout.value.layoutItems.push(newItem);
+      layout.layoutItems.push(newItem);
       console.log('[layoutStore.addComponent] ➕ Componente aggiunto:', componentId);
       return newItem;
     } catch (e) {
@@ -347,16 +351,17 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Rimuove un componente dal layout corrente
    */
-  const removeComponent = (componentId: string): boolean => {
-    if (!currentLayout.value) {
+  const removeComponent = (viewName: string, componentId: string): boolean => {
+    const layout = currentLayout.value[viewName];
+    if (!layout) {
       error.value = 'Nessun layout attivo';
       return false;
     }
 
     try {
-      const index = currentLayout.value.layoutItems.findIndex(item => item.i === componentId);
+      const index = layout.layoutItems.findIndex(item => item.i === componentId);
       if (index !== -1) {
-        currentLayout.value.layoutItems.splice(index, 1);
+        layout.layoutItems.splice(index, 1);
         console.log('[layoutStore.removeComponent] ➖ Componente rimosso:', componentId);
         return true;
       }
@@ -371,13 +376,14 @@ export const useLayoutStore = defineStore('layout', () => {
   /**
    * Aggiorna l'intero array di items (dopo drag/resize dalla griglia)
    */
-  const updateLayoutItems = (items: LayoutItemVO[]): void => {
-    if (!currentLayout.value) {
+  const updateLayoutItems = (viewName: string, items: LayoutItemVO[]): void => {
+    const layout = currentLayout.value[viewName];
+    if (!layout) {
       error.value = 'Nessun layout attivo';
       return;
     }
 
-    currentLayout.value.layoutItems = items;
+    layout.layoutItems = items;
     console.log('[layoutStore.updateLayoutItems] 🔄 Layout items aggiornati');
   };
 
@@ -385,7 +391,7 @@ export const useLayoutStore = defineStore('layout', () => {
    * Reset completo dello store
    */
   const $reset = () => {
-    currentLayout.value = null;
+    currentLayout.value = {};
     allLayouts.value = [];
     loading.value = false;
     error.value = null;
@@ -397,7 +403,6 @@ export const useLayoutStore = defineStore('layout', () => {
     allLayouts,
     loading,
     error,
-    // isUsingFallback,
 
     // Getters (computed)
     hasLayout,

@@ -35,15 +35,11 @@ const GridContainer = _GridContainer as any;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
 
-// watch(() => layoutStore.currentLayout, (val) => {
-//   console.log('[DEBUG] currentLayout changed → isDefault:', val?.isDefault, '| id:', val?.id);
-// }, { immediate: true, deep: false });
-
 // --- COMPUTED ---
 // Il layout ora viene dallo store invece che da ref locale
 const layout = computed({
-  get: () => layoutStore.layoutItems,
-  set: (newLayout) => layoutStore.updateLayoutItems(newLayout)
+  get: () => layoutStore.layoutItems(componentName).value,
+  set: (newLayout) => layoutStore.updateLayoutItems(componentName, newLayout)
 });
 
 // --- FUNZIONI
@@ -82,8 +78,8 @@ const resetLayout = async () => {
     try {
       await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
       console.log("[HomeView.resetLayout] Caricato layout di default");
-      if(layoutStore.currentLayout !== null) {
-        await layoutStore.deleteLayout(layoutStore.currentLayout);
+      if(layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
+        await layoutStore.deleteLayout(layoutStore.currentLayout[componentName]);
       }
 
       console.log("[HomeView.resetLayout] 🔄 Layout resettato");
@@ -95,21 +91,21 @@ const resetLayout = async () => {
 
 const toggleEditMode = async () => {
   
-  if (editMode.value && layoutStore.currentLayout !== null) {
+  if (editMode.value && layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
     console.debug(`[HomeView.toggleEditMode] editMode.value: ${editMode.value}`)
-    if (layoutStore.currentLayout.isDefault) {
-      layoutStore.currentLayout = {
-        ...layoutStore.currentLayout,
+    if (layoutStore.currentLayout[componentName].isDefault) {
+      layoutStore.currentLayout[componentName] = {
+        ...layoutStore.currentLayout[componentName],
         id: undefined,
         layoutName: componentName,
         isDefault: false,
       };
       console.log("[HomeView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
-      await layoutStore.saveLayout();
+      await layoutStore.saveLayout(componentName);
       console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
     }else {
-      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout)}`)
-      await layoutStore.updateLayout();
+      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
+      await layoutStore.updateLayout(componentName);
     }
 
   }
@@ -121,7 +117,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   if (!layoutStore.currentLayout) return;
 
   // Se è il layout di default, dobbiamo creare un "clone" personalizzato
-  layoutStore.updateLayoutItems(newItems);
+  layoutStore.updateLayoutItems(componentName, newItems);
 };
 </script>
 

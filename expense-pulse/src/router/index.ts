@@ -14,7 +14,8 @@ const router = createRouter({
       path: '/categories',
       name: 'categories',
       // Carica il componente solo quando l'utente visita la rotta
-      component: () => import('../views/CategoriesView.vue')
+      // component: () => import('../views/CategoriesView.vue')
+      component: CategoriesView
     }
   ],
 })
