@@ -1,9 +1,9 @@
 # TODO - Expense Pulse (Backend + Frontend)
 
 **Data:** 2026-03-06
-**Basato su:** Code Review completa BE + FE
+**Basato su:** Code Review completa BE + FE 
 
----
+--- -
 
 ## Legenda priorita
 
