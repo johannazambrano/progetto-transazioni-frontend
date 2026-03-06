@@ -5,7 +5,6 @@ import { LayoutMapper } from '@/models/mappers/LayoutMapper';
 import type { LayoutDTO } from '@/models/dtos/LayoutDTO';
 import type { LayoutVO } from '@/models/vo/LayoutVO';
 import type { LayoutItemVO } from '@/models/vo/LayoutItemVO';
-import { DEFAULT_LAYOUT_HOME, DEFAULT_LAYOUT_CATEGORIES, USE_BACKEND_LAYOUTS } from '@/constants/app.constants';
 import type { FiltroLayoutDTO } from '@/models/dtos/FiltroLayoutDTO';
 
 
@@ -16,7 +15,6 @@ export const useLayoutStore = defineStore('layout', () => {
   const allLayouts = ref<LayoutVO[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  // const isUsingFallback = ref(false);
 
 
   // --- GETTERS (computed) ---

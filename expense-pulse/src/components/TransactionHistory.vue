@@ -50,8 +50,6 @@ const handlePageChange = (p: number) => {
   });
 };
 
-// const startEdit = (t: Transaction) => emit('edit', t);
-// const confirmDelete = (t: Transaction) => emit('delete', t);
 const startEdit = (t: TransactionVO) => {
   isTransactionModalOpen.value = true;
   editTransaction.value = {
@@ -72,57 +70,6 @@ const confirmDelete = async (t: TransactionVO) => {
     } catch (error) {
       console.error("[TransactionHistory.confirmDelete] ❌ Errore durante l'eliminazione", error);
     }
-  }
-};
-
-const saveTransaction = async () => {
-  // Validazione: controlla che la descrizione non sia vuota
-  if (!editTransaction.value?.title.trim()) {
-    // || newCat.value.budget <= 0 per gestire eventualmente il budget
-    alert("Inserisci un titolo valido per la transazione."); // e un budget valido.
-    return;
-  }
-
-  // Controllo se il colore è già in uso
-  const colorExists = categoryStore.categories.some(
-    (c) => c.colore === editTransaction.value?.category.colore,
-  );
-
-  if (colorExists) {
-    alert(
-      "Questo colore è già stato assegnato a un'altra categoria. Scegline uno diverso!",
-    );
-    return;
-  }
-
-  try {
-    // Passiamo solo la stringa della descrizione allo store
-    await categoryStore.addCategory({
-      descrizione: editTransaction.value.category.descrizione,
-      budget: editTransaction.value.category.budget,
-      colore: editTransaction.value.category.colore,
-    });
-
-    // Reset e chiusura
-    isTransactionModalOpen.value = false;
-    editTransaction.value = {
-      id: "",
-      title: "",
-      amount: 0,
-      category: {
-        id: "",
-        descrizione: "",
-        codice: "",
-        budget: 0,
-        colore: "",
-      },
-      date: new Date().toISOString().split("T")[0] as string,
-    };
-    alert("Categoria creata con successo");
-  } catch (e: any) {
-    console.error("[TransactionHistory.saveTransaction] ❌ Errore durante il salvataggio della categoria:", e);
-    // e.message in questo punto conterrà "La categoria $categoria esiste già" lanciato dallo store
-    alert(e.message || "Errore durante il salvataggio della categoria.");
   }
 };
 </script>
@@ -185,48 +132,6 @@ const saveTransaction = async () => {
         <AppPagination :pagination="store.pagination" @change="handlePageChange" />
       </div>
     </section>
-    <!-- <div v-if="isTransactionModalOpen"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-gray-900">Modifica transazione</h3>
-          <button @click="isTransactionModalOpen = false" class="text-gray-400 hover:text-gray-600">
-            <X :size="24" />
-          </button>
-        </div>
-
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Titolo</label>
-            <input v-model="editTransaction!.title" type="text" placeholder="Spesa, aperitivo, benzina, ecc"
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Importo</label>
-            <input v-model="editTransaction!.amount" type="number" placeholder="500.00"
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Categoria</label>
-              <input v-model="editTransaction!.category.descrizione" type="text" placeholder="Categoria"
-                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-8 flex gap-3">
-          <button @click="isTransactionModalOpen = false"
-            class="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50">
-            Annulla
-          </button>
-          <button @click="saveTransaction"
-            class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">
-            Salva
-          </button>
-        </div>
-      </div>
-    </div> -->
   </div>
 </template>
 
