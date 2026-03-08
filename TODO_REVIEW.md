@@ -18,7 +18,7 @@
 
 ## P0 - Bug Critici
 
-### [ ] BE-BUG-1: ObjectId non validato causa 500
+### [✅] BE-BUG-1: ObjectId non validato causa 500
 
 **File:** `CategoryServiceImpl.java:53,108,140` | `TransactionsServiceImpl.java:109,130` | `LayoutServiceImpl.java:48,78,98`
 
@@ -32,7 +32,7 @@ new ObjectId(id) // Se id non e un hex di 24 caratteri -> IllegalArgumentExcepti
 
 ## P1 - Sicurezza
 
-### [ ] BE-SEC-1: Connection string MongoDB hardcoded
+### [✅] BE-SEC-1: Connection string MongoDB hardcoded
 
 **File:** `application.yml:31`
 
@@ -44,7 +44,7 @@ connection-string: mongodb://localhost:27017
 
 ---
 
-### [ ] BE-SEC-2: Swagger UI abilitato in produzione
+### [✅] BE-SEC-2: Swagger UI abilitato in produzione
 
 **File:** `application.yml:33-35`
 
@@ -68,7 +68,7 @@ Tutti gli endpoint sono pubblicamente accessibili.
 
 ## P1 - Configurazione
 
-### [ ] BE-CFG-1: CORS duplicato in due file
+### [✅] BE-CFG-1: CORS duplicato in due file
 
 **File:** `application.properties:1-6` e `application.yml:13-20`
 
@@ -76,7 +76,7 @@ Tutti gli endpoint sono pubblicamente accessibili.
 
 ---
 
-### [ ] BE-CFG-2: Database name duplicato
+### [✅] BE-CFG-2: Database name duplicato
 
 **File:** `application.yml:3-5`
 
@@ -95,7 +95,7 @@ database: expense-pulse  # duplicato
 
 ---
 
-### [ ] BE-CFG-4: `@CommonsLog` senza dipendenza esplicita
+### [✅] BE-CFG-4: `@CommonsLog` senza dipendenza esplicita
 
 **File:** Tutti i service e API usano `@CommonsLog` di Lombok.
 
@@ -105,14 +105,14 @@ database: expense-pulse  # duplicato
 
 ## P1 - API Design
 
-### [ ] BE-API-1: POST usato per operazioni di lettura
+### [✅] BE-API-1: POST usato per operazioni di lettura
 
 - `POST /layouts/default` -> dovrebbe essere `GET`
 - `POST /layouts/reset` -> dovrebbe essere `PUT`
 
 ---
 
-### [ ] BE-API-2: Endpoint duplicati
+### [✅] BE-API-2: Endpoint duplicati
 
 **File:** `LayoutApi.java:30-52`
 
@@ -122,7 +122,7 @@ database: expense-pulse  # duplicato
 
 ---
 
-### [ ] BE-API-3: Status code OpenAPI inconsistenti
+### [✅] BE-API-3: Status code OpenAPI inconsistenti
 
 **File:** `CategoryApi.java:68-70`
 
@@ -132,7 +132,7 @@ Documentazione dice `responseCode = "200"` ma il codice ritorna 201 (Created).
 
 ---
 
-### [ ] BE-API-4: Endpoint delete senza `@APIResponses`
+### [✅] BE-API-4: Endpoint delete senza `@APIResponses`
 
 **File:** `TransactionsApi.java:105-120`
 
@@ -162,7 +162,7 @@ Documentazione dice `responseCode = "200"` ma il codice ritorna 201 (Created).
 
 ---
 
-### [ ] BE-CQ-3: Catch silenzioso in MongoIndexConfig
+### [✅] BE-CQ-3: Catch silenzioso in MongoIndexConfig
 
 **File:** `MongoIndexConfig.java:37`
 
@@ -174,7 +174,7 @@ catch (Exception ignored) { }
 
 ---
 
-### [ ] BE-CQ-4: AbstractMapperComponent aggiunge null alla lista
+### [✅] BE-CQ-4: AbstractMapperComponent aggiunge null alla lista
 
 **File:** `AbstractMapperComponent.java:18-19`
 
@@ -184,7 +184,7 @@ Se `convertEntityToDto()` ritorna null, il null viene aggiunto alla lista risult
 
 ---
 
-### [ ] BE-CQ-5: Layout.isDefault e Boolean wrapper
+### [✅] BE-CQ-5: Layout.isDefault e Boolean wrapper
 
 **File:** `Layout.java:21`
 
@@ -196,7 +196,7 @@ Se `convertEntityToDto()` ritorna null, il null viene aggiunto alla lista risult
 
 ## P2 - Testing
 
-### [ ] BE-TEST-1: Solo test boilerplate
+### [✅] BE-TEST-1: Solo test boilerplate
 
 **File:** `GreetingResourceTest.java` testa endpoint `/hello` inesistente.
 
