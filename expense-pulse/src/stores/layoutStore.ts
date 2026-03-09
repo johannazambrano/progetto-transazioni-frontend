@@ -86,7 +86,7 @@ export const useLayoutStore = defineStore('layout', () => {
     try {
       let response;
       // Usa l'endpoint specifico per il layout di default
-      response = await api.post<LayoutDTO>('/layouts/default', {params: filtroLayoutDto});
+      response = await api.get<LayoutDTO>('/layouts/default', {params: filtroLayoutDto});
 
       if (!response.data || (typeof response.data === 'object' && Object.keys(response.data).length === 0)) {
         throw new Error(`Layout "${layoutName}" non trovato`);
