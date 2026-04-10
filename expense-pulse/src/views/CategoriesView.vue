@@ -47,9 +47,16 @@ onMounted(async () => {
   } catch (error) {
     console.warn("[CategoriesView.onMounted] ⚠️ Errore nel caricamento del layout, uso quello di default: ", DEFAULT_LAYOUT_CATEGORIES);
     await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
+    // Copia il layout nella chiave del componentName per far funzionare il computed
+    if (layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES]) {
+      layoutStore.currentLayout[componentName] = layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES];
+    }
   }
 
   categoryStore.fetchCategories();
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 const toggleEditMode = async () => {
@@ -64,7 +71,7 @@ const toggleEditMode = async () => {
       console.log("[CategoriesView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
       await layoutStore.saveLayout(componentName);
       console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
-    }else {
+    } else {
       console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
       await layoutStore.updateLayout(componentName);
     }
@@ -94,7 +101,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
     layoutStore.updateLayoutItems(componentName, newItems);
 
     console.log(`[CategoriesView.handleLayoutChange] Rilevata modifica al default in ${componentName}. Generazione nuovo layout...`);
-  } 
+  }
 };
 </script>
 
@@ -121,10 +128,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
         <span>{{ editMode ? "Blocca Layout" : "Modifica Layout" }}</span>
       </button>
     </div>
-    <GridContainer 
-      v-model:layout="layout" 
-      :is-editable="editMode" 
-      @layout-changed="handleLayoutChange">
+    <GridContainer v-model:layout="layout" :is-editable="editMode" @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />

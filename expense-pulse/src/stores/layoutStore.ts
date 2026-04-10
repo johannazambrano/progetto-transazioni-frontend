@@ -82,11 +82,11 @@ export const useLayoutStore = defineStore('layout', () => {
     }
     loading.value = true;
     error.value = null;
-  
+
     try {
       let response;
       // Usa l'endpoint specifico per il layout di default
-      response = await api.get<LayoutDTO>('/layouts/default', {params: filtroLayoutDto});
+      response = await api.get<LayoutDTO>('/layouts/default', { params: filtroLayoutDto });
 
       if (!response.data || (typeof response.data === 'object' && Object.keys(response.data).length === 0)) {
         throw new Error(`Layout "${layoutName}" non trovato`);
@@ -199,7 +199,7 @@ export const useLayoutStore = defineStore('layout', () => {
    * Elimina un layout
    */
   const deleteLayout = async (layoutDeleting: LayoutVO) => {
-    if(layoutDeleting !== null) {
+    if (layoutDeleting !== null) {
       if (layoutDeleting.isDefault) {
         error.value = 'Non puoi eliminare il layout di default';
         return;

@@ -23,14 +23,14 @@ const editTransaction = ref<TransactionVO>();
 
 // --- FUNZIONI ---
 // Funzione per generare un colore HEX random
-const generateRandomColor = () => {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+// const generateRandomColor = () => {
+//   const letters = "0123456789ABCDEF";
+//   let color = "#";
+//   for (let i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// };
 
 // Utility: Formattazione Valuta locale
 const formatCurrency = (value: number) => {

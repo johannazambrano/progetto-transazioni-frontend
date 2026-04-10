@@ -255,7 +255,7 @@ component: () => import('../views/CategoriesView.vue')    // lazy vanificato
 
 ---
 
-### [ ] FE-BUG-4: `window.scrollTo` fuori da onMounted
+### [✅] FE-BUG-4: `window.scrollTo` fuori da onMounted
 
 **File:** `HomeView.vue:73`
 
@@ -265,7 +265,7 @@ Eseguito a livello di modulo, duplicato (gia presente in `onMounted` a riga 69).
 
 ---
 
-### [ ] FE-BUG-5: `fetchCategories()` senza await
+### [✅] FE-BUG-5: `fetchCategories()` senza await
 
 **File:** `CategoriesView.vue:52`
 
@@ -277,7 +277,7 @@ categoryStore.fetchCategories()  // manca await
 
 ---
 
-### [ ] FE-BUG-6: Pulsante `+` categoria non invoca `openCategoryModal()`
+### [✅] FE-BUG-6: Pulsante `+` categoria non invoca `openCategoryModal()`
 
 **File:** `TransactionForm.vue:241`
 

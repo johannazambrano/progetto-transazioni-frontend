@@ -51,14 +51,19 @@ const getComponent = (itemId: string): Component | undefined => {
 onMounted(async () => {
   try {
     // Carica il layout dal backend specificando che è quello di default
-    await layoutStore.fetchLayout(componentName, false);    
+    await layoutStore.fetchLayout(componentName, false);
+    console.log("[HomeView.onMounted] ✅ Layout caricato");
   } catch (error) {
-    console.error("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);
+    console.warn("[HomeView.onMounted] ❌ Errore nel caricamento del layout:", error);
     await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
+    // Copia il layout nella chiave del componentName per far funzionare il computed
+    if (layoutStore.currentLayout[DEFAULT_LAYOUT_HOME]) {
+      layoutStore.currentLayout[componentName] = layoutStore.currentLayout[DEFAULT_LAYOUT_HOME];
+    }
   }
-    // Carica i dati degli store
-    await store.fetchTransactions();
-    await categoryStore.fetchCategories();
+  // Carica i dati degli store
+  await store.fetchTransactions();
+  await categoryStore.fetchCategories();
 
 
   // Scroll to top
@@ -66,7 +71,7 @@ onMounted(async () => {
 });
 
 // Optional smooth scroll to top when component mounts
-window.scrollTo({ top: 0, behavior: "smooth" });
+// window.scrollTo({ top: 0, behavior: "smooth" });
 
 // --- FUNZIONI DI PERSISTENZA ---
 
@@ -78,7 +83,7 @@ const resetLayout = async () => {
     try {
       await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
       console.log("[HomeView.resetLayout] Caricato layout di default");
-      if(layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
+      if (layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
         await layoutStore.deleteLayout(layoutStore.currentLayout[componentName]);
       }
 
@@ -90,7 +95,7 @@ const resetLayout = async () => {
 };
 
 const toggleEditMode = async () => {
-  
+
   if (editMode.value && layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
     console.debug(`[HomeView.toggleEditMode] editMode.value: ${editMode.value}`)
     if (layoutStore.currentLayout[componentName].isDefault) {
@@ -103,7 +108,7 @@ const toggleEditMode = async () => {
       console.log("[HomeView.toggleEditMode] 🔀 Clonato layout default → personalizzato");
       await layoutStore.saveLayout(componentName);
       console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
-    }else {
+    } else {
       console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
       await layoutStore.updateLayout(componentName);
     }
@@ -145,10 +150,7 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
       </button>
     </div>
 
-    <GridContainer 
-      v-model:layout="layout" 
-      :is-editable="editMode"
-      @layout-changed="handleLayoutChange">
+    <GridContainer v-model:layout="layout" :is-editable="editMode" @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />

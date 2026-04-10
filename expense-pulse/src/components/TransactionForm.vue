@@ -43,26 +43,26 @@ const generateRandomColor = () => {
   return color;
 };
 
-const openCategoryModal = () => {
-  // Si imposta automaticamente il codice restituito dallo store
-  newCat.value.codice = categoryStore.nextAvailableCode;
-  newCat.value.descrizione = "";
-  newCat.value.budget = 0;
-  isCategoryModalOpen.value = true;
-  // Generiamo un colore casuale
-  let randomColor = generateRandomColor();
+// const openCategoryModal = () => {
+//   // Si imposta automaticamente il codice restituito dallo store
+//   newCat.value.codice = categoryStore.nextAvailableCode;
+//   newCat.value.descrizione = "";
+//   newCat.value.budget = 0;
+//   isCategoryModalOpen.value = true;
+//   // Generiamo un colore casuale
+//   let randomColor = generateRandomColor();
 
-  // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
-  const existingColors = categoryStore.categories.map((c) =>
-    c.colore.toUpperCase(),
-  );
-  while (existingColors.includes(randomColor.toUpperCase())) {
-    randomColor = generateRandomColor();
-  }
+//   // Opzionale: Controllo rapido per evitare duplicati immediati con quelli esistenti
+//   const existingColors = categoryStore.categories.map((c) =>
+//     c.colore.toUpperCase(),
+//   );
+//   while (existingColors.includes(randomColor.toUpperCase())) {
+//     randomColor = generateRandomColor();
+//   }
 
-  newCat.value.colore = randomColor;
-  isCategoryModalOpen.value = true;
-};
+//   newCat.value.colore = randomColor;
+//   isCategoryModalOpen.value = true;
+// };
 
 const triggerShakeForm = () => {
   isShakingForm.value = true;
