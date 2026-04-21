@@ -7,6 +7,7 @@ import { ref, watch } from "vue";
 import { Plus, Pencil, RotateCcw } from "lucide-vue-next";
 import { useCategoryStore } from "@/stores/categoryStore";
 import type { CategoryVO } from "@/models/vo/CategoryVO";
+import { generateRandomColor } from "@/utils/generateRandomColor";
 
 const props = defineProps<{
   editData?: CategoryVO | null;
@@ -27,16 +28,6 @@ const formData = ref({
   budget: 0,
   colore: "#4f46e5",
 });
-
-// --- FUNZIONI ---
-const generateRandomColor = () => {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
 
 const resetForm = () => {
   isEditing.value = false;
@@ -68,8 +59,8 @@ const handleSave = async () => {
     }
     resetForm();
     emit("success");
-  } catch (error: any) {
-    alert(error.message || "Errore durante il salvataggio");
+  } catch (error: unknown) {
+    alert(error instanceof Error ? error.message : "Errore durante il salvataggio");
   }
 };
 

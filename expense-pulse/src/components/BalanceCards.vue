@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { Wallet, ArrowUpCircle, ArrowDownCircle } from "lucide-vue-next";
 import { useExpenseStore } from "../stores/expenseStore";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 const store = useExpenseStore();
-
-// Formattazione Euro (Best Practice: spostare in un utility file se usato spesso)
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
 </script>
 
 <template>

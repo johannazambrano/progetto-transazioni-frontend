@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component, computed } from "vue";
+import { ref, onMounted, type Component, computed, type DefineComponent } from "vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 import CategoryTable from "@/components/CategoryTable.vue";
@@ -17,7 +17,7 @@ const categoryStore = useCategoryStore();
 const layoutStore = useLayoutStore();
 
 // --- VARIABILI ---
-const GridContainer = _GridContainer as any;
+const GridContainer = _GridContainer as DefineComponent;
 const editMode = ref(false);
 
 // Mappa dei componenti - chiave: ID componente

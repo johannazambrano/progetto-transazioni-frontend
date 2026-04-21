@@ -6,6 +6,7 @@
 import { computed } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { Layers, TrendingUp, Wallet } from "lucide-vue-next";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 // --- STORE ---
 const categoryStore = useCategoryStore();
@@ -21,14 +22,6 @@ const averageBudget = computed(() => {
   if (totalCategories.value === 0) return 0;
   return totalBudget.value / totalCategories.value;
 });
-
-// --- FUNZIONI ---
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
 </script>
 
 <template>

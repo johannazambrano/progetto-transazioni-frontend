@@ -3,6 +3,7 @@ import { useExpenseStore } from "../stores/expenseStore";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { X } from "lucide-vue-next";
+import { debounce } from "@/utils/debounce";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -60,6 +61,10 @@ const applyFilters = async () => {
     },
   });
 };
+
+const debouncedSearch = debounce(() => {
+  applyFilters();
+}, 300);
 </script>
 
 <template>
@@ -79,7 +84,7 @@ const applyFilters = async () => {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="space-y-1">
         <label class="text-xs font-semibold text-gray-500 ml-1">Descrizione</label>
-        <input v-model="filters.title" @input="applyFilters" type="text" placeholder="E.g. Spesa Esselunga"
+        <input v-model="filters.title" @input="debouncedSearch" type="text" placeholder="E.g. Spesa Esselunga"
           class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
       </div>
 

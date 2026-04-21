@@ -8,6 +8,7 @@
 import type { CategoryVO } from "@/models/vo/CategoryVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { Pencil, Trash2 } from "lucide-vue-next";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 // --- STORE ---
 const categoryStore = useCategoryStore();
@@ -17,22 +18,14 @@ const emit = defineEmits<{
   (e: "edit", vategory: CategoryVO): void;
 }>();
 
-// Formattazione Euro
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
-
 const confirmDelete = async (cat: CategoryVO) => {
   if (
     confirm(`Sei sicuro di voler eliminare la categoria "${cat.descrizione}"?`)
   ) {
     try {
       await categoryStore.deleteCategory(cat.id);
-    } catch (error: any) {
-      alert(error.message || "Errore durante l'eliminazione");
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : "Errore durante l'eliminazione");
     }
   }
 };

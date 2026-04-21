@@ -1,20 +1,28 @@
 import type { LayoutItemVO } from '@/models/vo/LayoutItemVO';
 import type { LayoutItemDTO } from '@/models/dtos/LayoutItemDTO';
 
-/**
- * Mapper tra LayoutItemVO e LayoutItemDTO
- */
+interface LayoutItemRaw {
+  i?: string;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+  minW?: number;
+  maxW?: number;
+  minH?: number;
+  maxH?: number;
+  static?: boolean;
+  staticLayout?: boolean;
+}
+
 export class LayoutItemMapper {
-  /**
-   * Converte da DTO a VO
-   */
-  static toVO(dto: any): LayoutItemVO {
+  static toVO(dto: LayoutItemRaw): LayoutItemVO {
     return {
-      i: dto.i,
-      x: dto.x,
-      y: dto.y,
-      w: dto.w,
-      h: dto.h,
+      i: dto.i ?? '',
+      x: dto.x ?? 0,
+      y: dto.y ?? 0,
+      w: dto.w ?? 1,
+      h: dto.h ?? 1,
       minW: dto.minW,
       maxW: dto.maxW,
       minH: dto.minH,
@@ -23,10 +31,7 @@ export class LayoutItemMapper {
     };
   }
 
-  /**
-   * Converte da VO a DTO
-   */
-  static toDTO(vo: LayoutItemVO): any {
+  static toDTO(vo: LayoutItemVO): LayoutItemDTO {
     return {
       i: vo.i,
       x: vo.x,
@@ -37,7 +42,7 @@ export class LayoutItemMapper {
       maxW: vo.maxW,
       minH: vo.minH,
       maxH: vo.maxH,
-      staticLayout: vo.static,
+      static: vo.static,
     };
   }
 

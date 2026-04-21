@@ -10,6 +10,7 @@ import AppPagination from "@/components/AppPagination.vue";
 import type { TransactionVO } from "@/models/vo/TransactionVO";
 import { ref } from "vue";
 import { useCategoryStore } from "@/stores/categoryStore";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 // --- STORE ---
 const store = useExpenseStore();
@@ -19,26 +20,6 @@ const categoryStore = useCategoryStore();
 // --- VARIABILI ---
 const isTransactionModalOpen = ref(false);
 const editTransaction = ref<TransactionVO>();
-
-
-// --- FUNZIONI ---
-// Funzione per generare un colore HEX random
-// const generateRandomColor = () => {
-//   const letters = "0123456789ABCDEF";
-//   let color = "#";
-//   for (let i = 0; i < 6; i++) {
-//     color += letters[Math.floor(Math.random() * 16)];
-//   }
-//   return color;
-// };
-
-// Utility: Formattazione Valuta locale
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-};
 
 // Eventi: Emettiamo gli eventi al padre (HomeView) invece di gestire
 // la logica complessa qui, mantenendo il componente "Snello".

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, type Component, computed } from "vue";
+import { ref, onMounted, type Component, computed, type DefineComponent } from "vue";
 import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import { Lock, Edit3, RotateCcw } from "lucide-vue-next";
@@ -31,7 +31,7 @@ const componentMap: Record<string, Component> = {
   researchTable: ResearchTable,
   transactionHistory: TransactionHistory,
 };
-const GridContainer = _GridContainer as any;
+const GridContainer = _GridContainer as DefineComponent;
 
 const editMode = ref(false); // Stato per la modalità di modifica del layout
 
@@ -66,9 +66,11 @@ onMounted(async () => {
       };
     }
   }
-  // Carica i dati degli store
-  await store.fetchTransactions();
-  await categoryStore.fetchCategories();
+  // Carica i dati degli store in parallelo
+  await Promise.all([
+    store.fetchTransactions(),
+    categoryStore.fetchCategories()
+  ]);
 
 
   // Scroll to top

@@ -5,6 +5,7 @@ import { useExpenseStore } from "../stores/expenseStore";
 import { useCategoryStore } from "../stores/categoryStore";
 import type { TransactionVO } from "../models/vo/TransactionVO";
 import CategoryForm from "./CategoryForm.vue";
+import { generateRandomColor } from "@/utils/generateRandomColor";
 
 // --- VARIABILI ---
 const isShakingForm = ref(false);
@@ -32,16 +33,6 @@ const props = defineProps<{
   editData?: TransactionVO | null
 }>();
 const emit = defineEmits(['success', 'cancel', 'edit']);
-
-// Funzione per generare un colore HEX random
-const generateRandomColor = () => {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
 
 // const openCategoryModal = () => {
 //   // Si imposta automaticamente il codice restituito dallo store
@@ -175,9 +166,9 @@ const saveCategory = async () => {
       colore: "#4f46e5",
     };
     alert("Categoria creata con successo");
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[TransactionForm.saveCategory] ❌ Errore durante il salvataggio della categoria:", e);
-    alert(e.message || "Errore durante il salvataggio della categoria.");
+    alert(e instanceof Error ? e.message : "Errore durante il salvataggio della categoria.");
   }
 };
 
