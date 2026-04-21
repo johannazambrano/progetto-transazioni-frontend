@@ -49,11 +49,16 @@ onMounted(async () => {
     await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
     // Copia il layout nella chiave del componentName per far funzionare il computed
     if (layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES]) {
-      layoutStore.currentLayout[componentName] = layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES];
+      layoutStore.currentLayout[componentName] = {
+        ...layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES],
+        layoutName: componentName,
+        isDefault: false,
+        id: undefined
+      };
     }
   }
 
-  categoryStore.fetchCategories();
+  await categoryStore.fetchCategories();
 
   // Scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -61,7 +66,7 @@ onMounted(async () => {
 
 const toggleEditMode = async () => {
   if (editMode.value && layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
-    if (layoutStore.currentLayout.isDefault) {
+    if (layoutStore.currentLayout[componentName].isDefault) {
       layoutStore.currentLayout[componentName] = {
         ...layoutStore.currentLayout[componentName],
         id: undefined,
@@ -72,8 +77,8 @@ const toggleEditMode = async () => {
       await layoutStore.saveLayout(componentName);
       console.log("[CategoriesView.toggleEditMode] 🔒 Layout bloccato e salvato");
     } else {
-      console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
-      await layoutStore.updateLayout(componentName);
+      console.debug(`[CategoriesView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
+      await layoutStore.saveLayout(componentName);
     }
   }
 
@@ -85,8 +90,29 @@ const toggleEditMode = async () => {
  */
 const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
-    await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
-    console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
+    try {
+      // 1. Verifica se esiste un layout personalizzato da eliminare
+      const existingLayout = layoutStore.currentLayout[componentName];
+      if (existingLayout && existingLayout.id && !existingLayout.isDefault) {
+        await layoutStore.deleteLayout(existingLayout);
+      }
+
+      // 2. Carica il layout di default dal DB
+      await layoutStore.fetchLayout(DEFAULT_LAYOUT_CATEGORIES, true);
+
+      // 3. Copia il layout di default nella chiave del componentName
+      // Mantiene isDefault: true (questo È il layout originale)
+      if (layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES]) {
+        layoutStore.currentLayout[componentName] = {
+          ...layoutStore.currentLayout[DEFAULT_LAYOUT_CATEGORIES],
+          layoutName: componentName,
+          isDefault: true
+        };
+      }
+      console.log("[CategoriesView.resetLayout] 🔄 Layout resettato");
+    } catch (error) {
+      console.error("[CategoriesView.resetLayout] ❌ Errore nel reset del layout");
+    }
   }
 };
 

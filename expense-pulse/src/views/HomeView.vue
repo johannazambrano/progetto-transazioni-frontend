@@ -58,7 +58,12 @@ onMounted(async () => {
     await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
     // Copia il layout nella chiave del componentName per far funzionare il computed
     if (layoutStore.currentLayout[DEFAULT_LAYOUT_HOME]) {
-      layoutStore.currentLayout[componentName] = layoutStore.currentLayout[DEFAULT_LAYOUT_HOME];
+      layoutStore.currentLayout[componentName] = {
+        ...layoutStore.currentLayout[DEFAULT_LAYOUT_HOME],
+        layoutName: componentName,
+        isDefault: false,
+        id: undefined
+      };
     }
   }
   // Carica i dati degli store
@@ -81,10 +86,23 @@ onMounted(async () => {
 const resetLayout = async () => {
   if (confirm("Vuoi ripristinare il layout predefinito? Le modifiche andranno perse.")) {
     try {
+      // 1. Verifica se esiste un layout personalizzato da eliminare
+      const existingLayout = layoutStore.currentLayout[componentName];
+      if (existingLayout && existingLayout.id && !existingLayout.isDefault) {
+        await layoutStore.deleteLayout(existingLayout);
+      }
+
+      // 2. Carica il layout di default dal DB
       await layoutStore.fetchLayout(DEFAULT_LAYOUT_HOME, true);
-      console.log("[HomeView.resetLayout] Caricato layout di default");
-      if (layoutStore.currentLayout !== null && layoutStore.currentLayout[componentName] !== undefined) {
-        await layoutStore.deleteLayout(layoutStore.currentLayout[componentName]);
+
+      // 3. Copia il layout di default nella chiave del componentName
+      // Mantiene isDefault: true (questo È il layout originale)
+      if (layoutStore.currentLayout[DEFAULT_LAYOUT_HOME]) {
+        layoutStore.currentLayout[componentName] = {
+          ...layoutStore.currentLayout[DEFAULT_LAYOUT_HOME],
+          layoutName: componentName,
+          isDefault: true
+        };
       }
 
       console.log("[HomeView.resetLayout] 🔄 Layout resettato");
@@ -110,7 +128,7 @@ const toggleEditMode = async () => {
       console.log("[HomeView.toggleEditMode] 🔒 Layout bloccato e salvato");
     } else {
       console.debug(`[HomeView.toggleEditMode] layoutStore.currentLayout: ${JSON.stringify(layoutStore.currentLayout[componentName])}`)
-      await layoutStore.updateLayout(componentName);
+      await layoutStore.saveLayout(componentName);
     }
 
   }
