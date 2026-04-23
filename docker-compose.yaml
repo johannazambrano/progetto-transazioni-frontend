@@ -1,62 +1,137 @@
 name: expense-pulse
-services:
-    frontend:
-        build:
-            context: ./expense-pulse
-        ports:
-            - "5173:5173"
-        volumes:
-            - ./expense-pulse:/app
-            - /app/node_modules
-        environment:
-            - NODE_ENV=development
-        restart: always
-        networks:
-            - expense-network
-        healthcheck:
-            test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173/" ]
-            interval: 10s
-            timeout: 5s
-            retries: 3
-            start_period: 20s
 
-    backend:
-        build:
-            context: ../progetto-transazioni-backend
-            dockerfile: Dockerfile
-        ports:
-            - "9091:9091"
-            - "5005:5005"
-        volumes:
-            - ../progetto-transazioni-backend:/app
-            - ~/.m2:/root/.m2
-        environment:
-            - QUARKUS_PROFILE=prod
-        networks:
-            - expense-network
-        healthcheck:
-            test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9091/q/health/live" ]
-            interval: 10s
-            timeout: 5s
-            retries: 3
-            start_period: 30s
-    mongo:
-        image: mongo:8.0
-        # container_name: expense-mongo
-        restart: always
-        ports:
-            - "27017:27017" 
-        # environment:
-        #     - MONGO_INITDB_ROOT_USERNAME=root
-        #     - MONGO_INITDB_ROOT_PASSWORD=secret
-        #     - MONGO_INITDB_DATABASE=expense-pulse
-        volumes:
-            - mongo-data:/data/db
-        networks:
-            - expense-network
+services:
+  mongodb:
+    image: mongo:8.0
+    restart: always
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - expense-network
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-init:
+    image: mongo:8.0
+    restart: no
+    volumes:
+      - ./expense-pulse/data-init:/data/init
+    command: >
+      sh -c "mongosh --host mongodb:27017 --quiet /data/init/init.js"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - expense-network
+
+  backend:
+    build:
+      context: ../progetto-transazioni-backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9091:9091"
+      - "5005:5005"
+    volumes:
+      - ../progetto-transazioni-backend:/app
+      - ~/.m2:/root/.m2
+    environment:
+      - QUARKUS_PROFILE=dev
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+      - QUARKUS_MONGODB_DATABASE=expense-pulse
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - expense-network
+    profiles:
+      - dev
+
+  backend-prod:
+    build:
+      context: ../progetto-transazioni-backend
+      dockerfile: src/main/docker/Dockerfile.jvm
+    restart: always
+    ports:
+      - "9091:8080"
+    environment:
+      - QUARKUS_PROFILE=prod
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://mongodb:27017
+      - QUARKUS_MONGODB_DATABASE=expense-pulse
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - expense-network
+    profiles:
+      - prod
+
+  frontend-dev:
+    build:
+      context: ./expense-pulse
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./expense-pulse:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://backend:9091/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - expense-network
+    profiles:
+      - dev
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./expense-pulse
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "80:8080"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      backend-prod:
+        condition: service_started
+    networks:
+      - expense-network
+    profiles:
+      - prod
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
-    expense-network:
-        driver: bridge
+  expense-network:
+    driver: bridge
+
 volumes:
   mongo-data:
