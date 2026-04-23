@@ -10,21 +10,23 @@ const emit = defineEmits(['change']);
 </script>
 
 <template>
-  <div v-if="pagination && pagination.totalPages > 1" class="flex items-center justify-center gap-4 mt-8 py-4">
+  <div v-if="pagination && pagination.totalPages > 1" class="flex items-center justify-center gap-2 sm:gap-4 mt-4 sm:mt-8 py-2 sm:py-4">
     <button @click="emit('change', pagination.currentPage - 1)" :disabled="pagination.currentPage === 0"
-      class="p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors">
-      <ChevronLeft :size="20" />
+      class="p-1.5 sm:p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors">
+      <ChevronLeft :size="16" class="sm:hidden" />
+      <ChevronLeft :size="20" class="hidden sm:inline" />
     </button>
 
-    <div class="text-sm font-medium text-gray-600">
+    <div class="text-xs sm:text-sm font-medium text-gray-600">
       Pagina <span class="font-bold text-gray-900">{{ pagination.currentPage + 1 }}</span> di {{ pagination.totalPages
       }}
     </div>
 
     <button @click="emit('change', pagination.currentPage + 1)"
       :disabled="pagination.currentPage >= pagination.totalPages - 1"
-      class="p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors">
-      <ChevronRight :size="20" />
+      class="p-1.5 sm:p-2 rounded-lg border border-gray-200 disabled:opacity-30 hover:bg-gray-50 transition-colors">
+      <ChevronRight :size="16" class="sm:hidden" />
+      <ChevronRight :size="20" class="hidden sm:inline" />
     </button>
   </div>
 </template>

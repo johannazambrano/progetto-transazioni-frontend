@@ -69,9 +69,14 @@ const chartOptions = {
 </script>
 
 <template>
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
-    <h3 class="text-lg font-bold mb-4 text-gray-800">Andamento temporale delle Spese</h3>
-    <div class="h-64">
+  <div class="card-wrapper">
+    <header class="card-header">
+      <div class="p-4 sm:p-6 border-b border-gray-100">
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800">Andamento temporale delle Spese</h3>
+      </div>
+    </header>
+
+    <div class="card-content p-4 sm:p-6">
       <Bar v-if="store.transactions.length > 0" :data="chartData" :options="chartOptions" />
       <div v-else class="h-full flex items-center justify-center text-gray-400">
         Nessun dato disponibile

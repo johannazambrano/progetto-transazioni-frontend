@@ -25,7 +25,7 @@ const averageBudget = computed(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-32 p-2">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
     <!-- Totale Categorie -->
     <div
       class="bg-linear-to-br from-indigo-500 to-indigo-600 p-4 rounded-2xl shadow-lg flex flex-col justify-center text-white"
