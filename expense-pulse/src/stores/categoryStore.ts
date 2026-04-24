@@ -4,13 +4,25 @@ import { ref, computed } from "vue";
 import { CategoryMapper } from "@/models/mappers/CategoryMapper";
 import type { CategoryResponseDTO } from "@/models/dtos/CategoryResponseDTO";
 import type { CategoryVO } from "@/models/vo/CategoryVO";
+import type { FiltroRicercaCategoryDTO } from "@/models/dtos/FiltroRicercaCategoryDTO";
+import type { PaginationVO } from "@/models/vo/PaginationVO";
+import type { PaginazioneDTO } from "@/models/dtos/PaginazioneDTO";
 
 export const useCategoryStore = defineStore("category", () => {
   console.log("[categoryStore] Entriamo dentro useCategoryStore");
 
-  //const categories = ref<Category[]>([]);
   const categories = ref<CategoryVO[]>([]);
+  const pagination = ref<PaginationVO | null>(null);
   const loading = ref(false);
+
+  const toPaginazioneEntity = (dto: PaginazioneDTO): PaginationVO => {
+    return {
+      currentPage: dto.numeroPagina,
+      totalPages: dto.numeroPagTotali,
+      totalElements: dto.numeroRisTotali,
+      pageSize: dto.numeroElementiPerPagina
+    };
+  };
 
   // Calcola il prossimo codice incrementando l'ultimo (es: "002" -> "003")
   const nextAvailableCode = computed(() => {
@@ -24,11 +36,31 @@ export const useCategoryStore = defineStore("category", () => {
     return (maxCode + 1).toString().padStart(3, "0");
   });
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (
+    filters: Partial<FiltroRicercaCategoryDTO> = {}
+  ) => {
     loading.value = true;
     try {
-      const response = await api.get<CategoryResponseDTO>("/categories");
-      categories.value = response.data.categories.map(CategoryMapper.toEntity);
+      const payload: FiltroRicercaCategoryDTO = {
+        descrizione: filters.descrizione?.trim() || undefined,
+        paginazione: {
+          numeroPagina: filters.paginazione?.numeroPagina || 0,
+          numeroElementiPerPagina: filters.paginazione?.numeroElementiPerPagina || 10,
+        },
+      };
+
+      console.log("[categoryStore.fetchCategories] Inviando payload ricerca:", payload);
+
+      const response = await api.post<CategoryResponseDTO>(
+        "/categories/ricerca",
+        payload
+      );
+
+      const data = response.data;
+      categories.value = data.categories.map(CategoryMapper.toEntity);
+      if (data.paginazione) {
+        pagination.value = toPaginazioneEntity(data.paginazione);
+      }
     } catch (error) {
       console.error("[categoryStore.fetchCategories] ❌ Errore nel caricamento categorie:", error);
     } finally {
@@ -95,25 +127,33 @@ export const useCategoryStore = defineStore("category", () => {
     }
   };
 
-  const deleteCategory = async (catId: string) => {
-    // Implementa la logica di eliminazione categoria
+const deleteCategory = async (catId: string) => {
     try {
-      // chiamata DELETE al BE con l'ID della categoria
       await api.delete(`/categories/${catId}`);
-      // refresh della lista
       await fetchCategories();
     } catch (error) {
       console.error("[categoryStore.deleteCategory] ❌ Errore durante l'eliminazione della categoria:", error);
     }
   };
 
+  const changePage = async (pageNumber: number) => {
+    await fetchCategories({
+      paginazione: {
+        numeroPagina: pageNumber,
+        numeroElementiPerPagina: 10,
+      },
+    });
+  };
+
   return {
     categories,
+    pagination,
     loading,
     nextAvailableCode,
     fetchCategories,
     addCategory,
     updateCategory,
     deleteCategory,
+    changePage,
   };
 });

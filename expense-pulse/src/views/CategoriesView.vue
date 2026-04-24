@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type Component, computed, type DefineComponent } from "vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
+import type { CategoryVO } from "@/models/vo/CategoryVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 import CategoryTable from "@/components/CategoryTable.vue";
 import CategoryForm from "@/components/CategoryForm.vue";
@@ -15,6 +16,25 @@ const componentName = "CategoriesView"; // nome del componente usato per associa
 // --- STORE ---
 const categoryStore = useCategoryStore();
 const layoutStore = useLayoutStore();
+
+// --- EDIT STATE ---
+const categoryToEdit = ref<CategoryVO | null>(null);
+const showForm = ref(false);
+
+const handleEditCategory = (category: CategoryVO) => {
+  categoryToEdit.value = category;
+  showForm.value = true;
+};
+
+const handleFormCancel = () => {
+  categoryToEdit.value = null;
+  showForm.value = false;
+};
+
+const handleFormSuccess = () => {
+  categoryToEdit.value = null;
+  showForm.value = false;
+};
 
 // --- VARIABILI ---
 const GridContainer = _GridContainer as DefineComponent;
@@ -157,6 +177,10 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
     <GridContainer v-model:layout="layout" :is-editable="editMode" @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
+          :edit-data="item.i === 'form' ? categoryToEdit : null"
+          @edit="handleEditCategory"
+          @success="handleFormSuccess"
+          @cancel="handleFormCancel"
           :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />
       </template>
     </GridContainer>

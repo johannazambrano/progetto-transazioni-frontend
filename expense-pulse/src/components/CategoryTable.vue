@@ -9,6 +9,7 @@ import type { CategoryVO } from "@/models/vo/CategoryVO";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { Pencil, Trash2 } from "lucide-vue-next";
 import { formatCurrency } from "@/utils/formatCurrency";
+import AppPagination from "@/components/AppPagination.vue";
 
 // --- STORE ---
 const categoryStore = useCategoryStore();
@@ -17,6 +18,15 @@ const categoryStore = useCategoryStore();
 const emit = defineEmits<{
   (e: "edit", vategory: CategoryVO): void;
 }>();
+
+const handlePageChange = (p: number) => {
+  categoryStore.fetchCategories({
+    paginazione: {
+      numeroPagina: p,
+      numeroElementiPerPagina: 10,
+    },
+  });
+};
 
 const confirmDelete = async (cat: CategoryVO) => {
   if (
@@ -34,14 +44,15 @@ const confirmDelete = async (cat: CategoryVO) => {
 <template>
   <div class="card-wrapper">
     <header class="card-header">
-      <div class="p-4 sm:p-6 border-b border-gray-100">
+      <div class="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 class="text-lg sm:text-xl font-bold text-gray-800">Categorie</h2>
+        <span class="text-xs sm:text-sm text-gray-500">{{ categoryStore.categories.length }} categorie</span>
       </div>
     </header>
 
     <div class="card-content overflow-x-auto">
       <table class="w-full text-left border-collapse min-w-[500px]">
-        <thead>
+        <thead class="sticky top-0 bg-gray-50 z-10">
           <tr class="bg-gray-50 border-b border-gray-100">
             <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Colore</th>
             <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Codice</th>
@@ -73,6 +84,14 @@ const confirmDelete = async (cat: CategoryVO) => {
           </tr>
         </tbody>
       </table>
+
+      <div v-if="categoryStore.categories.length === 0" class="p-8 sm:p-20 text-center text-gray-400">
+        <p class="text-sm sm:text-base">Non ci sono ancora categorie. Inizia aggiungendone una!</p>
+      </div>
     </div>
+
+    <footer class="card-footer">
+      <AppPagination :pagination="categoryStore.pagination" @change="handlePageChange" />
+    </footer>
   </div>
 </template>
