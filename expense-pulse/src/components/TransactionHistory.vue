@@ -42,53 +42,69 @@ const confirmDelete = async (t: TransactionVO) => {
       </div>
     </header>
 
-    <div class="card-content">
-      <ul class="divide-y divide-gray-100">
-        <li v-for="t in store.transactions" :key="t.id"
-          class="p-3 sm:p-5 hover:bg-gray-50 transition-colors flex items-center justify-between gap-2 group">
-          <div class="flex items-center gap-2 sm:gap-4 min-w-0">
-            <div :class="[
-              'p-2 sm:p-3 rounded-2xl transition-all shrink-0',
-              t.amount > 0
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-rose-100 text-rose-500',
-            ]">
-              <component :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle" :size="20" />
-            </div>
-            <div class="min-w-0">
-              <p class="font-bold text-sm sm:text-base text-gray-900 truncate">{{ t.title }}</p>
-              <p class="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 flex-wrap">
-                <Calendar :size="10" class="sm:hidden" />
-                <Calendar :size="12" class="hidden sm:inline" /> {{ t.date }}
-                <span class="hidden sm:inline">•</span>
-                <span class="hidden xs:inline">{{ t.category.descrizione }}</span>
-                <span class="inline xs:hidden">{{ t.category.codice }}</span>
+    <div class="card-content overflow-x-auto">
+      <table class="w-full text-left border-collapse min-w-[600px]">
+        <thead class="sticky top-0 bg-gray-50 z-10">
+          <tr class="bg-gray-50 border-b border-gray-100">
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Tipo</th>
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Titolo</th>
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Data</th>
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Categoria</th>
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase text-right">Importo</th>
+            <th class="p-2 sm:p-4 text-[10px] sm:text-xs font-bold text-gray-400 uppercase text-center">Azioni</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="t in store.transactions" :key="t.id" class="hover:bg-gray-50 transition-colors">
+            <td class="p-2 sm:p-4">
+              <div :class="[
+                'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shrink-0',
+                t.amount > 0
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-rose-100 text-rose-500',
+              ]">
+                <component :is="t.amount > 0 ? ArrowUpCircle : ArrowDownCircle" :size="20" />
+              </div>
+            </td>
+            <td class="p-2 sm:p-4">
+              <p class="font-bold text-sm sm:text-base text-gray-900">{{ t.title }}</p>
+            </td>
+            <td class="p-2 sm:p-4">
+              <p class="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1">
+                <Calendar :size="12" /> {{ t.date }}
               </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-            <span :class="[
-              'font-black text-base sm:text-lg mr-1 sm:mr-4',
-              t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
-            ]">
-              {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
-            </span>
-
-            <button @click="onEditClick(t)"
-              class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2">
-              <Pencil :size="16" class="sm:hidden" />
-              <Pencil :size="18" class="hidden sm:inline" />
-            </button>
-
-            <button @click="confirmDelete(t)"
-              class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Elimina transazione">
-              <Trash2 :size="16" class="sm:hidden" />
-              <Trash2 :size="18" class="hidden sm:inline" />
-            </button>
-          </div>
-        </li>
-      </ul>
+            </td>
+            <td class="p-2 sm:p-4">
+              <span class="inline-block px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium"
+                :style="{ backgroundColor: t.category.colore + '20', color: t.category.colore }">
+                {{ t.category.descrizione }}
+              </span>
+            </td>
+            <td class="p-2 sm:p-4 text-right">
+              <span :class="[
+                'font-black text-base sm:text-lg',
+                t.amount > 0 ? 'text-emerald-600' : 'text-rose-600',
+              ]">
+                {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
+              </span>
+            </td>
+            <td class="p-2 sm:p-4">
+              <div class="flex justify-center gap-1 sm:gap-2">
+                <button @click="onEditClick(t)"
+                  class="p-1 sm:p-2 text-gray-400 hover:text-amber-500 transition-colors">
+                  <Pencil :size="16" class="sm:hidden" />
+                  <Pencil :size="18" class="hidden sm:inline" />
+                </button>
+                <button @click="confirmDelete(t)"
+                  class="p-1 sm:p-2 text-gray-400 hover:text-red-500 transition-colors">
+                  <Trash2 :size="16" class="sm:hidden" />
+                  <Trash2 :size="18" class="hidden sm:inline" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <div v-if="store.transactions.length === 0" class="p-8 sm:p-20 text-center text-gray-400">
         <p class="text-sm sm:text-base">Non ci sono ancora transazioni. Inizia aggiungendone una!</p>
