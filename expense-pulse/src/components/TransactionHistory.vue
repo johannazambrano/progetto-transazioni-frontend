@@ -8,14 +8,18 @@ import { formatCurrency } from "@/utils/formatCurrency";
 
 const store = useExpenseStore();
 
+const emit = defineEmits<{
+  (e: 'edit', transaction: TransactionVO): void
+}>();
+
 const handlePageChange = (p: number) => {
   store.fetchTransactions({
     paginazione: { numeroPagina: p, numeroElementiPerPagina: 10 }
   });
 };
 
-const startEdit = (t: TransactionVO) => {
-  // emit edit event to parent for modal handling
+const onEditClick = (transaction: TransactionVO) => {
+  emit('edit', transaction);
 };
 
 const confirmDelete = async (t: TransactionVO) => {
@@ -70,7 +74,7 @@ const confirmDelete = async (t: TransactionVO) => {
               {{ t.amount > 0 ? "+" : "" }}{{ formatCurrency(t.amount) }}
             </span>
 
-            <button @click="startEdit(t)"
+            <button @click="onEditClick(t)"
               class="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500 transition-all p-2">
               <Pencil :size="16" class="sm:hidden" />
               <Pencil :size="18" class="hidden sm:inline" />

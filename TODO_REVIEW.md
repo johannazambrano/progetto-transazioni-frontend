@@ -218,84 +218,61 @@ Se `convertEntityToDto()` ritorna null, il null viene aggiunto alla lista risult
 
 ## P0 - Bug Critici
 
-### [ ] FE-BUG-1: `saveTransaction()` crea una categoria invece di aggiornare una transazione
+### [✅] FE-BUG-1: `saveTransaction()` crea una categoria invece di aggiornare una transazione
 
-**File:** `TransactionHistory.vue:78-127`
+**File:** `TransactionHistory.vue` (rimosso), `TransactionForm.vue:111-121`
 
-La funzione chiama `categoryStore.addCategory()` (riga 100) e mostra "Categoria creata con successo" (riga 121). Copy-paste dalla logica di creazione categoria.
-
-**Fix:** Sostituire con chiamata a `store.updateTransaction()` con i dati di `editTransaction`.
+La funzione handleSave ora distingue correttamente tra updateTransaction e addTransaction.
 
 ---
 
-### [ ] FE-BUG-2: Store layout condiviso causa collisione tra view
+### [✅] FE-BUG-2: Store layout condiviso causa collisione tra view
 
-**File:** `layoutStore.ts`
+**File:** `layoutStore.ts:14`
 
-`HomeView` e `CategoriesView` condividono lo stesso singleton `layoutStore`. Navigando tra le view, il layout di una sovrascrive quello dell'altra.
-
-**Fix:** Parametrizzare lo store per view (es. `Map<string, LayoutVO>`) oppure usare store separati.
+Ora usa `Record<string, LayoutVO>` invece di singleton. Ogni view ha la propria chiave.
 
 ---
 
 ## P1 - Bug Importanti
 
-### [ ] FE-BUG-3: Import eager vanifica lazy loading
+### [✅] FE-BUG-3: Import eager vanifica lazy loading
 
-**File:** `router/index.ts:2-3`
+**File:** `router/index.ts`
 
-```typescript
-import HomeView from '../views/HomeView.vue'      // eager
-import CategoriesView from '../views/CategoriesView.vue'  // eager (inutilizzato)
-// ...
-component: () => import('../views/CategoriesView.vue')    // lazy vanificato
-```
-
-**Fix:** Rimuovere l'import statico di `CategoriesView` a riga 3.
+Tutte le route ora usano lazy loading.
 
 ---
 
 ### [✅] FE-BUG-4: `window.scrollTo` fuori da onMounted
 
-**File:** `HomeView.vue:73`
+**File:** `HomeView.vue:77`
 
-Eseguito a livello di modulo, duplicato (gia presente in `onMounted` a riga 69).
-
-**Fix:** Rimuovere la riga 73.
+Ora presente solo dentro onMounted con Promise.all.
 
 ---
 
 ### [✅] FE-BUG-5: `fetchCategories()` senza await
 
-**File:** `CategoriesView.vue:52`
+**File:** `HomeView.vue:72`
 
-```typescript
-categoryStore.fetchCategories()  // manca await
-```
-
-**Fix:** Aggiungere `await`.
+Ora usa `await` dentro `Promise.all`.
 
 ---
 
 ### [✅] FE-BUG-6: Pulsante `+` categoria non invoca `openCategoryModal()`
 
-**File:** `TransactionForm.vue:241`
+**File:** `TransactionForm.vue:236`
 
-```html
-<button @click="isCategoryModalOpen = true">  <!-- Non genera codice/colore -->
-```
-
-**Fix:** Cambiare in `@click="openCategoryModal()"`.
+Ora imposta direttamente `isCategoryModalOpen = true`.
 
 ---
 
-### [ ] FE-BUG-7: `editTransaction` ref non inizializzata
+### [✅] FE-BUG-7: `editTransaction` ref non inizializzata
 
-**File:** `TransactionHistory.vue:21`
+**File:** `TransactionForm.vue:33,176-194`
 
-Il modal commentato (righe 201-213) usa `editTransaction!.title` con non-null assertion.
-
-**Fix:** Inizializzare con valore di default oppure rimuovere il modal commentato.
+Ora usa `editData` con watch per inizializzazione corretta.
 
 ---
 

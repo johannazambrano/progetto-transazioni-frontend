@@ -9,6 +9,9 @@ import { generateRandomColor } from "@/utils/generateRandomColor";
 
 // --- VARIABILI ---
 const isShakingForm = ref(false);
+const isShakingTitle = ref(false);
+const isShakingAmount = ref(false);
+const isShakingCategory = ref(false);
 const isEditing = ref(false);
 const editingId = ref<string | null>(null);
 const showErrors = ref(false);
@@ -60,6 +63,21 @@ const triggerShakeForm = () => {
   setTimeout(() => (isShakingForm.value = false), 400);
 };
 
+const triggerTitleShake = () => {
+  isShakingTitle.value = true;
+  setTimeout(() => (isShakingTitle.value = false), 400);
+};
+
+const triggerAmountShake = () => {
+  isShakingAmount.value = true;
+  setTimeout(() => (isShakingAmount.value = false), 400);
+};
+
+const triggerCategoryShake = () => {
+  isShakingCategory.value = true;
+  setTimeout(() => (isShakingCategory.value = false), 400);
+};
+
 // Funzione per annullare la modifica
 const cancelEdit = () => {
   isEditing.value = false;
@@ -79,13 +97,13 @@ const handleSave = async () => {
 
   // Validazione descrizione
   if (!newTransaction.value.title.trim()) {
-    triggerShakeForm();
+    triggerTitleShake();
     return; // Il messaggio apparirà sotto l'input
   }
 
   // Validazione importo
   if (newTransaction.value.amount === 0) {
-    triggerShakeForm();
+    triggerAmountShake();
     return;
   }
 
@@ -93,8 +111,8 @@ const handleSave = async () => {
     (cat) => cat.descrizione === newTransaction.value.category,
   );
 
-  if (!selectedCategoryObj) {
-    triggerShakeForm();
+  if (!selectedCategoryObj || newTransaction.value.category === "") {
+    triggerCategoryShake();
     return;
   }
 
@@ -122,7 +140,11 @@ const handleSave = async () => {
 
     // 3. // Reset degli errori e del form dopo il successo
     showErrors.value = false;
+    isShakingTitle.value = false;
+    isShakingAmount.value = false;
+    isShakingCategory.value = false;
     cancelEdit();
+    emit('success', transactionData);
   } catch (error) {
     console.error("[TransactionForm.handleSave] ❌ Errore durante il salvataggio della transazione:", error);
     alert("Si è verificato un errore durante il salvataggio.");
@@ -214,6 +236,7 @@ watch(() => props.editData, (newData) => {
               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
               :class="{
                 'border-red-400': showErrors && !newTransaction.title.trim(),
+                'animate-shake': isShakingTitle
               }" />
             <p v-if="showErrors && !newTransaction.title.trim()" class="text-[10px] text-red-500 mt-1 absolute left-1">
               Campo obbligatorio
@@ -225,6 +248,7 @@ watch(() => props.editData, (newData) => {
               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
               :class="{
                 'border-red-400': showErrors && newTransaction.amount === 0,
+                'animate-shake': isShakingAmount
               }" />
             <p v-if="showErrors && newTransaction.amount === 0" class="text-[10px] text-red-500 mt-1 absolute left-1">
               Deve essere ≠ 0
@@ -238,7 +262,11 @@ watch(() => props.editData, (newData) => {
               </button>
             </div>
             <select v-model="newTransaction.category"
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+              :class="{
+                'border-red-400': showErrors && newTransaction.category !== 'Altro' && newTransaction.category !== '',
+                'animate-shake': isShakingCategory
+              }">
               <option disabled value="">Seleziona...</option>
               <option v-if="categoryStore.categories.length === 0" disabled>
                 Caricamento categorie...

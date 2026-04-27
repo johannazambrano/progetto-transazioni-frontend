@@ -10,6 +10,7 @@ import TransactionForm from "@/components/TransactionForm.vue";
 import ResearchTable from "@/components/ResearchTable.vue";
 import TransactionHistory from "@/components/TransactionHistory.vue";
 import type { LayoutItemVO } from "@/models/vo/LayoutItemVO";
+import type { TransactionVO } from "@/models/vo/TransactionVO";
 import { DEFAULT_LAYOUT_HOME } from "@/constants/app.constants";
 import _GridContainer from "@/components/GridContainer.vue";
 import { useLayoutStore } from "@/stores/layoutStore";
@@ -22,6 +23,7 @@ const categoryStore = useCategoryStore();
 const layoutStore = useLayoutStore();
 
 // --- VARIABILI ---
+const transactionToEdit = ref<TransactionVO | null>(null);
 // Mappa dei componenti - chiave: ID componente
 const componentMap: Record<string, Component> = {
   balance: BalanceCards,
@@ -141,8 +143,15 @@ const toggleEditMode = async () => {
 const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
   if (!layoutStore.currentLayout) return;
 
-  // Se è il layout di default, dobbiamo creare un "clone" personalizzato
   layoutStore.updateLayoutItems(componentName, newItems);
+};
+
+const onTransactionEdit = (transaction: TransactionVO) => {
+  transactionToEdit.value = transaction;
+};
+
+const onTransactionSaved = () => {
+  transactionToEdit.value = null;
 };
 </script>
 
@@ -173,7 +182,11 @@ const handleLayoutChange = async (newItems: LayoutItemVO[]) => {
     <GridContainer v-model:layout="layout" :is-editable="editMode" @layout-changed="handleLayoutChange">
       <template #default="{ item }: any">
         <component v-if="item && item.i" :is="getComponent(item.i)"
-          :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'" />
+          :class="!editMode ? '' : 'rounded-2xl shadow-sm border border-dashed border-indigo-500/30 overflow-hidden fit-content'"
+          :edit-data="item.i === 'transactionForm' ? transactionToEdit : null"
+          @edit="onTransactionEdit"
+          @success="onTransactionSaved"
+        />
       </template>
     </GridContainer>
   </main>
