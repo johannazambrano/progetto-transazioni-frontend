@@ -222,7 +222,7 @@ export const useLayoutStore = defineStore('layout', () => {
   };
 
   /**
-   * Resetta al layout di default
+   * Resetta al layout di default recuperandolo dal backend
    */
   const resetLayout = async (viewName: string) => {
     loading.value = true;
@@ -234,13 +234,13 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     try {
-      const response = await api.post<LayoutDTO>('/layouts/reset', filtroLayoutDto);
+      const response = await api.get<LayoutDTO>('/layouts/default', { params: filtroLayoutDto });
       currentLayout.value[viewName] = LayoutMapper.toVO(response.data);
       console.log('[layoutStore.resetLayout] 🔄 Layout resettato');
     } catch (e) {
       console.error('[layoutStore.resetLayout] ❌ Errore nel reset del layout:', e);
-      console.warn('[layoutStore.resetLayout] 🔄 Reset con fallback alle costanti');
-      error.value = 'Backend non disponibile, layout resettato localmente';
+      error.value = 'Impossibile resettare il layout';
+      throw e;
     } finally {
       loading.value = false;
     }
