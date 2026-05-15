@@ -15,6 +15,7 @@ export const useExpenseStore = defineStore("expense", () => {
   const pagination = ref<PaginationVO | null>(null);
   const loading = ref(false); // Utile per mostrare uno spinner
   const transactionToEdit = ref<TransactionVO | null>(null);
+  const activeFilters = ref<Omit<FiltroRicercaTransactionDTO, 'paginazione'>>({});
 
 
   // GETTERS: calcoli automatici (reattivi)
@@ -51,20 +52,17 @@ export const useExpenseStore = defineStore("expense", () => {
   ) => {
     loading.value = true;
     try {
-      // Creiamo il payload dinamicamente
-      const payload: FiltroRicercaTransactionDTO = {
-        // Invia il titolo solo se non è una stringa vuota, altrimenti undefined
+      // Salviamo i filtri attivi (esclusa la paginazione) per riutilizzarli al cambio pagina
+      activeFilters.value = {
         title: filters.title?.trim() || undefined,
-
-        // Fondamentale: invia la categoria solo se non è "" (Tutte le categorie)
-        category:
-          filters.category && filters.category !== ""
-            ? filters.category
-            : undefined,
-
+        category: filters.category && filters.category !== "" ? filters.category : undefined,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
+      };
 
+      // Creiamo il payload dinamicamente
+      const payload: FiltroRicercaTransactionDTO = {
+        ...activeFilters.value,
         paginazione: {
           numeroPagina: filters.paginazione?.numeroPagina || 0,
           numeroElementiPerPagina: 10,
@@ -104,7 +102,7 @@ export const useExpenseStore = defineStore("expense", () => {
       await api.post("/transactions", dto);
 
       // 4. Refresh della lista
-      await fetchTransactions();
+      await fetchTransactions({ ...activeFilters.value });
     } catch (error) {
       console.error("[expenseStore.addTransaction] ❌ Errore add transaction:", error);
       throw error; // Rilanciamo l'errore per gestirlo nel componente
@@ -114,7 +112,7 @@ export const useExpenseStore = defineStore("expense", () => {
   const deleteTransaction = async (id: string) => {
     try {
       await api.delete(`/transactions/${id}`);
-      await fetchTransactions();
+      await fetchTransactions({ ...activeFilters.value });
     } catch (error) {
       console.error("[expenseStore.deleteTransaction] ❌ Errore delete:", error);
       throw error; // Rilanciamo l'errore
@@ -131,7 +129,7 @@ export const useExpenseStore = defineStore("expense", () => {
       await api.put(`/transactions/${updatedTransaction.id}`, dto);
 
       // 3. Refresh
-      await fetchTransactions();
+      await fetchTransactions({ ...activeFilters.value });
 
       // 4. Usciamo dalla modalità modifica
       cancelEdit();
@@ -151,11 +149,11 @@ export const useExpenseStore = defineStore("expense", () => {
   };
 
   const changePage = async (pageNumber: number) => {
-    // Chiamiamo fetchTransactions passando il numero della pagina desiderata
     await fetchTransactions({
+      ...activeFilters.value,
       paginazione: {
         numeroPagina: pageNumber,
-        numeroElementiPerPagina: 10, // O il valore che preferisci
+        numeroElementiPerPagina: 10,
       },
     });
   };
@@ -165,6 +163,7 @@ export const useExpenseStore = defineStore("expense", () => {
     pagination,
     loading,
     transactionToEdit,
+    activeFilters,
     totalBalance,
     totalIncomes,
     totalExpenses,
